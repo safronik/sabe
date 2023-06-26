@@ -1,0 +1,58 @@
+##
+## ������ ���� ����� ������������� � ���������� ������ ������������ �����.
+## ����� �� �������� ����� �� ���������, ����� ������� �������� �� ���������.
+## �� ���������� ������� ������ "#" ����� �����������!!!
+##
+## ���� �� ������ ��������� Apache ���, ����� ���� ��� ����� �� ���������
+## ����, ��. ������ http ://www.denwer.ru/faq/shared.html
+##
+
+
+
+##
+## ��� dnwr-��������� "���������������" � ������� ������������ ����� (httpd.conf).
+## ���������� ������� �������� (����� ����������� � �������) �� �� ����������.
+## �� ������ �������� ���� � ������ ���������, �������� �� ��� � ������� �����.
+##
+
+## �������� �������
+<IfModule mod_rewrite.c>
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.php?query=$1 [L,QSA]
+</IfModule>
+
+##�������� ������
+ErrorDocument 403 /403
+##ErrorDocument 404 /404
+ErrorDocument 500 /500
+
+## ������ ��������� ����������
+Options All -Indexes
+
+## ������ ��������� ������
+##<Files "\.(php)$">
+##order allow,deny
+##deny from all
+##</Files>
+
+## ����������� / ����� = 2592000 ������
+##<FilesMatch ".(flv|gif|jpg|jpeg|png|ico|swf|js|css|pdf)$">
+##Header set Cache-Control "max-age=2592000"
+##</FilesMatch>
+
+## ������ �� �����������
+##<FilesMatch ".(pl|php|cgi|spl|scgi|fcgi|css|js)$">
+##Header unset Cache-Control
+##</FilesMatch>
+
+## ���������� ��� �������
+AddType application/octet-stream .pdf
+AddType application/octet-stream .doc
+AddType application/octet-stream .docx
+AddType application/octet-stream .xls
+AddType application/octet-stream .xlsx
+
+php_value display_errors 1
+php_value display_startup_errors 1
