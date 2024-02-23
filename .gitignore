@@ -14,4 +14,4 @@ vendor/
 tests
 
 #ingnore cache storage
-cache/*
+**/cache
