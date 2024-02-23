@@ -1,0 +1,17 @@
+# ignore project meta information
+.idea/
+
+# ignore node dependency directories
+node_modules/
+vendor/
+
+# ignore log files and databases
+*.log
+*.sql
+*.sqlite
+
+#ignore tests
+tests
+
+#ingnore cache storage
+cache/*
