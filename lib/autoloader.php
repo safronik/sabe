@@ -1,10 +1,14 @@
 <?php
 
-foreach( glob( __DIR__ . DIRECTORY_SEPARATOR . 'extension_*' ) as $extension ){
+/**
+ * Register extensions
+ */
+ foreach( glob( __DIR__ . DIRECTORY_SEPARATOR . 'extension_*' ) as $extension ){
     require_once $extension;
 }
-
-/**
+ 
+ /**
+ * Autoload classes
  *
  * @param string $class
  *

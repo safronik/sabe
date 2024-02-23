@@ -2,22 +2,44 @@
 
 namespace Safronik\Core;
 
-use Safronik\Core\Variables\Server;
 use Safronik\Services\Services;
 
+/**
+ * Class Core
+ 
+ * @package Safronik\Core
+ */
 class Core
 {
+    /**
+     * Core constructor.
+     */
     public function __construct()
     {
+        $this->initializeDB();
+        $this->initializeServices();
+        
+    }
+    
+    /**
+     * Initialize DB
+     */
+    private function initializeDB()
+    {
         \Safronik\Services\DB\DB::initialize(
-            new \Safronik\Services\DB\Config([
-                'driver'    => 'PDO',
-                'username'  => Server::get( 'SERVER_NAME' ) === 'sue.loc' ? 'root' : 'cl82418_sue',
-                'password'  => Server::get( 'SERVER_NAME' ) === 'sue.loc' ? 'root' : 'qaswEDFR123321',
-                'db_prefix' => 'cms_',
+            new \Safronik\Services\DB\DBConfig([
+                'database' => 'sabe',
+                'username' => 'root',
+                'password' => 'root',
             ])
         );
-
+    }
+    
+    /**
+     * Initialize services
+     */
+    private function initializeServices()
+    {
         Services::initialize(
             \Safronik\Services\DB\Gateways\DBGateways::getInstance(),
         );

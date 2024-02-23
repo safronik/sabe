@@ -16,7 +16,7 @@ final class SQLScheme extends \Safronik\Services\DBStructureHandler\SQLScheme
                 [ 'field' => 'content',      'type' => 'TEXT',           'null' => 'yes', ],
             ],
             'indexes' => [
-                [ 'name' => 'PRIMARY',    'type' => 'KEY',    'body' => '(`element_id`)' ],
+                [ 'name' => 'PRIMARY',    'type' => 'KEY',          'body' => '(`element_id`)' ],
                 [ 'name' => 'block_name', 'type' => 'UNIQUE INDEX', 'body' => '(`element_name`)' ],
             ],
         ],

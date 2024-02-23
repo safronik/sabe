@@ -2,9 +2,10 @@
 
 namespace Safronik\Services;
 
-use Safronik\Core\CodeTemplates\Interfaces\Containerable;
 use Safronik\Core\CodeTemplates\Container;
+use Safronik\Core\CodeTemplates\Interfaces\Containerable;
 use Safronik\Core\CodeTemplates\Interfaces\Installable;
+use Safronik\Core\CodeTemplates\Interfaces\Serviceable;
 
 final class Services implements Containerable
 {

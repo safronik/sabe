@@ -7,7 +7,7 @@ class SQLScheme
     public static array $scheme = [
         'options' => [
             'columns' => [
-                [ 'field' => 'id',           'type' => 'int',      'null' => 'no', 'extra' => 'AUTO_INCREMENT'],
+                [ 'field' => 'id',           'type' => 'int',                               'null' => 'no', 'extra' => 'AUTO_INCREMENT'],
                 [ 'field' => 'affiliation',  'type' => 'varchar(50)',  'default' => 'NULL', ],
                 [ 'field' => 'option_name',  'type' => 'varchar(50)',  'default' => 'NULL', ],
                 [ 'field' => 'option_value', 'type' => 'mediumtext',   'default' => 'NULL', ],

@@ -14,7 +14,7 @@ trait Service
         return static::$gateway_alias ?? null;
     }
     
-    protected function initService( $gateway )
+    protected function initService( $gateway ): void
     {
     
     }

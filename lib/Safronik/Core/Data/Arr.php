@@ -4,12 +4,13 @@ namespace Safronik\Core\Data;
 
 class Arr
 {
+    
     /**
      * Modifies the array $array. Paste $insert on $position
      *
-     * @param array $array
+     * @param array      $array
      * @param int|string $position
-     * @param mixed $insert
+     * @param mixed      $insert
      */
     public static function insert(&$array, $position, $insert)
     {

@@ -20,11 +20,11 @@ final class Option extends OptionAbstract{
 		return $this->default ?? [];
 	}
     
-	/**
-	 * Save option to the DB or other storage
-	 *
-	 * @return void
-	 */
+    /**
+     * Save option to the DB or other storage
+     *
+     * @return bool
+     */
 	public function save(): bool
     {
         return $this->gateway->saveOption( $this->name, $this->group, $this->storage ) === 1;

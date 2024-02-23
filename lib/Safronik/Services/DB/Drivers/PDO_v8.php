@@ -3,17 +3,21 @@
 namespace Safronik\Services\DB\Drivers;
 
 use \PDOStatement;
+use Safronik\Core\Exceptions\Exception;
 
-class PDO_v8 extends PDO{
-	
-	/**
-	 * Safely replace placeholders
-	 *
-	 * @param string $query
-	 * @param array  $options
-	 *
-	 * @return bool|PDOStatement
-	 */
+class PDO_v8 extends PDO
+{
+    
+    /**
+     * Safely replace placeholders
+     *
+     * @param string $query
+     * @param array  $options
+     *
+     * @throws Exception
+     *
+     * @return bool|PDOStatement
+     */
 	public function prep( $query, $options = [] ) {
 		return parent::prep( $query, $options );
 	}

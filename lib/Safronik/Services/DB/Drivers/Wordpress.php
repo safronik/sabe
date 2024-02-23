@@ -8,13 +8,13 @@ use mysql_xdevapi\Result;
 class Wordpress implements DBDriverInterface{
 	
 	/**
-	 * @var WPDB
+	 * @var \WPDB
 	 */
 	private $wpdb;
 	private $query;
 	private $result;
 	
-	public function __construct( WPDB $connection )
+	public function __construct( \WPDB $connection )
 	{
 		$this->wpdb   = $connection;
 	}

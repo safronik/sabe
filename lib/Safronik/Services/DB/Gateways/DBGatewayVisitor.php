@@ -25,13 +25,9 @@ final class DBGatewayVisitor extends AbstractDBGateway implements DBVisitorGatew
     public function getVisits( string $id ): array
     {
         return $this->db
-            ->setResponseMode( 'array' )
-            ->select(
-                'visitors',
-                [ 'hits' ],
-                [
-                    'id' => [ $id, 'string']
-                ]
-            );
+            ->columns( 'hits' )
+            ->from('visitors')
+            ->where([ 'id' => [ $id ] ] )
+            ->fetchAll();
     }
 }

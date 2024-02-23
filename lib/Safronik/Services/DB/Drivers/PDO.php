@@ -3,6 +3,7 @@
 namespace Safronik\Services\DB\Drivers;
 
 use \PDOStatement;
+use Safronik\Core\Exceptions\Exception;
 
 class PDO extends \PDO implements DBDriverInterface
 {
@@ -40,34 +41,32 @@ class PDO extends \PDO implements DBDriverInterface
     public function prep( $query, $options = [] )
     {
         $this->prepared_statement = $this->prepare( $query, $options );
-        if( $this->prepared_statement !== false ){
-            $this->query = $this->prepared_statement->queryString;
-        }else{
-            // @todo throw error
-        }
+        
+        $this->prepared_statement === false &&
+            throw new Exception('failed');
+        
+        $this->query = $this->prepared_statement->queryString;
         
         return true;
     }
     
     public function execute( $params = array() )
     {
-        if( ! empty( $params ) ){
-            $result = $this->prepared_statement->execute( $params );
-        }else{
-            $result = $this->prepared_statement->execute();
-        }
-        
+        $result = ! empty( $params )
+            ? $this->prepared_statement->execute( $params )
+            : $this->prepared_statement->execute();
+    
         $this->result = $this->prepared_statement;
         
         return $result;
     }
     
     /**
-	 * @param $statement
-	 *
-	 * @return bool|int
+     * @param string $statement
+     *
+     * @return bool|int
      */
-	public function exec( $statement )
+	public function exec( $statement ): int|false
     {
 		$this->query         = $statement;
 		$this->rows_affected = parent::exec( $statement );

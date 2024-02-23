@@ -2,33 +2,21 @@
 
 namespace Safronik\Core;
 
+use Safronik\Services\Cache\CacheOptions;
 use Safronik\Services\Request\Request;
 use Safronik\Services\Cache\Cache;
-use Safronik\Apps\SABE\SABE;
 
 class Router
 {
     public function __construct( private Request $request )
     {
         // @todo log visitor and request
-        if( Cache::isRequestMethodShouldBeCached( $this->request->method ) ){
-            //new Cache( $this->request->id );
-        }
+        $cache = new Cache( new CacheOptions() );
+        $cache->isMethodShouldBeCached( $this->request->method )
+            && $cache->cache( $this->request );
         
-        if( REST::isRESTRequest( $this->request ) ){
+        if( REST::isREST( $this->request ) ){
             new REST( $this->request->shiftRoute() );
         }
-        
-        new SABE(
-            ...[
-                'options'  => [ 'settings' ],
-                'services' => [
-                    'db',
-                    'visitor',
-                    'user',
-                    'request',
-                ],
-            ]
-        );
     }
 }

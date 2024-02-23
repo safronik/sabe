@@ -7,12 +7,12 @@ class SQLScheme
 	/**
      * Schema table prefix
      */
-    protected static $schema_prefix = '';
+    protected $schema_prefix = '';
 	
     /**
      * @var string[]
      */
-	protected static $field_standard = array(
+	protected $field_standard = array(
 		'field'   => '',
 		'type'    => '',
 		'null'    => 'yes',
@@ -22,23 +22,23 @@ class SQLScheme
 
     /**
      * Set of SQL-schemas for tables in array
-     * Set for all websites. Should installed with a main database prefix
+     * Set for all websites. Should be installed with a main database prefix
      *
      * @var array
      */
-    protected static $schemas = [];
+    protected $schemas = [];
     
-    public function __construct( array $scheme )
+    public function __construct( array $schema )
     {
-        self::$schemas = $scheme;
+        $this->schemas = $schema;
     }
     
     /**
 	 * @return array
 	 */
-	public static function get()
+	public function get()
 	{
-		return static::$schemas;
+		return $this->schemas;
 	}
     
     /**
@@ -48,13 +48,12 @@ class SQLScheme
      *
      * @return array      Schema
      */
-    public static function getByTableName( $table )
+    public function getByTableName( $table ): array
     {
-        $schemas__all = static::get();
+        ! array_key_exists( $table, $this->schemas ) &&
+            throw new \Exception( "Schema doesn't contain table: $table" );
         
-        if( array_key_exists( $table, $schemas__all ) ){
-            return $schemas__all[ $table ];
-        }
+        return $this->schemas[ $table ];
     }
 
     /**
@@ -62,9 +61,9 @@ class SQLScheme
      *
      * @return string
      */
-    public static function getSchemaPrefix()
+    public function getSchemaPrefix(): string
     {
-        return static::$schema_prefix;
+        return $this->schema_prefix;
     }
 
     /**
@@ -75,13 +74,13 @@ class SQLScheme
      *
      * @return array
      */
-    public static function getTableNames( $with_schema_prefix = true )
+    public function getTableNames( bool $with_schema_prefix = true )
     {
-        $table_names = array_keys( static::$schemas );
+        $table_names = array_keys( $this->schemas );
         
         if( $with_schema_prefix ){
             foreach( $table_names as &$table_name ){
-                $table_name = self::getSchemaPrefix() . $table_name;
+                $table_name = $this->getSchemaPrefix() . $table_name;
             }
         }
         
@@ -93,19 +92,19 @@ class SQLScheme
      *
      * @return string[]
      */
-    public static function getDefaultField()
+    public function getDefaultField(): array
     {
-        return static::$field_standard;
+        return $this->field_standard;
     }
     
-    public static function setMissingColumnValuesToDefault( $column )
+    public function setMissingColumnValuesToDefault( $column ): array
     {
-        return array_merge( self::getDefaultField(), $column );
+        return array_merge( $this->getDefaultField(), $column );
     }
     
-    public static function convertColumnSchemaToSQLNotation( $column )
+    public function convertColumnSchemaToSQLNotation( $column ): array
     {
-        $column            = self::setMissingColumnValuesToDefault( $column );
+        $column            = $this->setMissingColumnValuesToDefault( $column );
         $column['null']    = $column['null'] === 'no' ? 'NOT NULL' : 'NULL';
         $column['default'] = $column['default'] ? 'DEFAULT ' . $column['default'] : '';
         $column['extra']   = $column['extra'] ?: '';
@@ -113,18 +112,18 @@ class SQLScheme
         return $column;
     }
     
-    public static function convertTableSchemaToSQLNotation( $table_schema )
+    public function convertTableSchemaToSQLNotation( $table_schema )
     {
         foreach( $table_schema['columns'] as &$column ){
-            $column = self::convertColumnSchemaToSQLNotation( $column );
+            $column = $this->convertColumnSchemaToSQLNotation( $column );
         }
         
         return $table_schema;
     }
 
-    public static function getTableSchemaWithSQLNotation( $table_name )
+    public function getTableSchemaWithSQLNotation( $table_name )
     {
-        return self::convertTableSchemaToSQLNotation( self::getByTableName( $table_name ) );
+        return $this->convertTableSchemaToSQLNotation( $this->getByTableName( $table_name ) );
     }
     
 	/**
@@ -133,9 +132,9 @@ class SQLScheme
 	 *
 	 * @return string|null
 	 */
-	public static function getColumnType( $table, $column ): ?string
+	public function getColumnType( $table, $column ): ?string
     {
-		foreach( self::get()[ $table ]['columns'] as $column_data ){
+		foreach( $this->get()[ $table ]['columns'] as $column_data ){
 			if( in_array( $column, $column_data, true ) ){
 				$type = $column_data['type'];
 			}
@@ -174,4 +173,47 @@ class SQLScheme
 		
 		return null;
 	}
+    
+    /**
+     * In case of emergency use this method
+     *
+     * If you don't set the type size like this: INT(11) or BIGINT(20),
+     *  it won't be equal to the actual size from DB ( DB always returns type with sizes ).
+     *
+     * So the schema will be always different from actual and DBStructureHandler will be forced to update this column,
+     *  despite that it's already has the correct type size.
+     *
+     * @param $schema
+     *
+     * @return void
+     */
+    public function fixSchemaTypeSize( $schema )
+    {
+        foreach( $schema as $table ){
+            
+            $types = array_column( $table['columns'], 'type' );
+            
+            foreach( $types as $type ){
+                
+                // Compute length for *INT types
+                if( preg_match( '@^([a-zA-Z]*(INT))(?!\(\d+\))\s?(UNSIGNED)?@', $type, $matches ) ){
+                    $length = match ( $matches[1] ) {
+                                  'TINYINT' => 3,
+                                  'SMALLINT' => 5,
+                                  'MEDIUMINT' => 8,
+                                  'INT' => 10,
+                                  'BIGINT' => 20,
+                              } + ( ! empty( $matches[3] ) ? 1 : 0 );
+                    continue;
+                }
+                
+                // Compute length for BIT
+                if( preg_match( '@^([a-zA-Z]*(BIT))(?!\(\d+\))@', $type, $matches ) ){
+                    $length = 1;
+                }
+            }
+            
+            $type = preg_replace( '@' . $matches[1] . '@', $matches[1] . "($length)", $type );
+        }
+    }
 }

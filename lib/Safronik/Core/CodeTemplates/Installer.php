@@ -3,13 +3,19 @@
 namespace Safronik\Core\CodeTemplates;
 
 trait Installer
-{
+{    
+    /** Returns namespace from class name */
+    public static function getNamespace( $string ): ?string
+    {
+        return pathinfo( $string, PATHINFO_DIRNAME );
+    }
+	
     public static function getScheme(): ?array
     {
-        $scheme_classname = pathinfo( static::class, PATHINFO_DIRNAME ) . '\\SQLScheme';
+        $scheme_classname = substr( static::class, 0, strrpos( static::class, "\\")) . '\\SQLScheme';
         
-        return class_exists( $scheme_classname ) && property_exists( $scheme_classname, 'scheme')
-            ? $scheme_classname::$scheme
+        return class_exists( $scheme_classname ) && property_exists( $scheme_classname, 'schemas')
+            ? $scheme_classname::$schemas
             : null;
     }
     

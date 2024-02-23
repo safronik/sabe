@@ -7,14 +7,14 @@ use Safronik\Services\Request\Request;
 class REST
 {
     private Request $request;
-    private static $rest_external_route = 'rest';
+    private static string $rest_external_route = 'rest';
     
     public function __construct( Request $request )
     {
         $this->request = $request;
     }
     
-    public static function isRESTRequest( Request $request ): bool
+    public static function isREST( Request $request ): bool
     {
         return $request->currentRoute() === self::$rest_external_route;
     }
@@ -22,7 +22,7 @@ class REST
     /**
      * @return Request
      */
-    private function getAvailableRoutes()
+    private function getAvailableRoutes(): Request
     {
         return $this->request;
     }

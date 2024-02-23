@@ -1,6 +1,6 @@
 <?php
 
-namespace Safronik\Services;
+namespace Safronik\Core\CodeTemplates\Interfaces;
 
 interface Serviceable
 {

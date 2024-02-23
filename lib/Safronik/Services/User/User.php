@@ -3,12 +3,12 @@
 namespace Safronik\Services\User;
 
 // Interfaces
+use Safronik\Core\CodeTemplates\Installer;
 use Safronik\Core\CodeTemplates\Interfaces\Installable;
-use Safronik\Services\Serviceable;
+use Safronik\Core\CodeTemplates\Interfaces\Serviceable;
+use Safronik\Core\CodeTemplates\Service;
 
 // Templates
-use Safronik\Core\CodeTemplates\Service;
-use Safronik\Core\CodeTemplates\Installer;
 
 class User implements Serviceable, Installable
 {

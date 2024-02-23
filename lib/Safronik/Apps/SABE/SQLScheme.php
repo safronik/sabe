@@ -15,7 +15,7 @@ final class SQLScheme extends \Safronik\Services\DBStructureHandler\SQLScheme
                 [ 'field' => 'blocks', 'type' => 'VARCHAR(511)',  'null' => 'yes', 'default' => 'null', ],
             ],
             'indexes' => [
-                [ 'type' => 'PRIMARY', 'name' => 'KEY', 'body' => '(`page`)' ],
+                [ 'name' => 'PRIMARY', 'type' => 'KEY', 'body' => '(`page`)' ],
             ],
         ],
     ];

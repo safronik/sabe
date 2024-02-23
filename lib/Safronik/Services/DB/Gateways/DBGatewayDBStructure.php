@@ -8,39 +8,29 @@ class DBGatewayDBStructure extends AbstractDBGateway implements DBGatewayDBStruc
 {
     public function isTableExists( $table ): bool
     {
-        return $this->db
-            ->isTableExists( $table );
+        return $this->db->isTableExists( $table );
     }
     
     public function createTable( $table, $scheme ): bool
     {
-        return $this->db
-            ->createTable( $table, $scheme['columns'], $scheme['indexes'], true );
+        return $this->db->createTable( $table, $scheme['columns'], $scheme['indexes'] ?? null, true );
     }
     
     public function dropTable( $table ): bool
     {
-        return $this->db
-            ->dropTable( $table );
+        return $this->db->dropTable( $table );
     }
-
     
-    public function alterTable(
-        $table,
-        $columns_create = [],
-        $columns_change = [],
-        $columns_drop = [],
-        $indexes = []
-    ): bool{
-        return $this->db
-            ->alterTable( $table, $columns_create, $columns_change, $columns_drop, $indexes );
+    public function alterTable( $table, $columns_create = [], $columns_change = [], $columns_drop = [], $indexes = [] ): bool
+    {
+        return $this->db->alterTable( $table, $columns_create, $columns_change, $columns_drop, $indexes );
     }
     
     public function getTableColumns( $table ): array
     {
         return $this->db
             ->setResponseMode( 'array' )
-            ->prepare( 'SHOW COLUMNS FROM :table', [ [ ':table', $table, 'table' ] ] )
+            ->prepare( [ [ ':table', $table, 'table' ] ], 'SHOW COLUMNS FROM :table' )
             ->query()
             ->fetchAll();
     }

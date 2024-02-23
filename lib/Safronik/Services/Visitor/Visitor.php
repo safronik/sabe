@@ -3,29 +3,18 @@
 namespace Safronik\Services\Visitor;
 
 // Interfaces
-use Safronik\Services\Serviceable;
-use Safronik\Core\CodeTemplates\Interfaces\Installable;
+use Safronik\Core\Variables\Server;
 
 // Templates
-use Safronik\Core\CodeTemplates\Singleton;
-use Safronik\Core\CodeTemplates\Service;
-use Safronik\Core\CodeTemplates\Installer;
 
 // Applied
-use Safronik\Core\Variables\Server;
-use Safronik\Core\CodeTemplates\Interfaces\Eventable;
-use Safronik\Core\CodeTemplates\Event;
 
 /**
- * @method private registerVisitor( false|string $id, string $ip, false|int|string $ip_decimal, string $user_agent, string $browser_signature )
- * @method protected addIP()
+ * @method registerVisitor( false|string $id, string $ip, false|int|string $ip_decimal, string $user_agent, string $browser_signature )
+ * @method addIP()
+ * @method addBrowserSignature()
  */
-class Visitor implements Serviceable, Installable, Eventable{
-	
-	use Singleton, Service, Installer, Event;
-    
-    protected static string $service_alias = 'visitor';
-    protected static string $gateway_alias = 'visitor';
+class Visitor{
     
 	public string $id;
 	public string $ip;

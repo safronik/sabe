@@ -2,7 +2,6 @@
 
 namespace Safronik\Apps;
 
-use Safronik\Core\CodeTemplates\Installer;
 use Safronik\Services\Services;
 use Safronik\Services\Options\Options;
 

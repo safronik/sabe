@@ -2,37 +2,66 @@
 
 namespace Safronik\Services\Cache;
 
-use Safronik\Services\Serviceable;
+use Safronik\Core\CodeTemplates\Hydrator;
+use Safronik\Core\CodeTemplates\Interfaces\Serviceable;
 use Safronik\Core\CodeTemplates\Service;
+use Safronik\Services\Request\Request;
 
 class Cache implements Serviceable
 {
     use Service;
+    use Hydrator;
     
-    private static array $request_types_to_cache = ['GET', 'HEAD'];
-    private       string $cache_directory = __DIR__ . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
-    private       string $cache_file;
+    // Options
+    private array  $request_types_to_cache = ['GET', 'HEAD'];
+    private string $cache_directory = __DIR__ . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
+    private array  $allowed_ttl = [
+        'GET'  => '86400',
+        'HEAD' => '86400',
+    ];
     
-    public function __construct( string $cache_id, ?string $directory_with_cache = null )
+    // Cache metadata
+    private string $cache_file;
+    
+    // Metadata from file
+    // @todo cache metadata file
+    
+    public function __construct( CacheOptions $options )
     {
-        $this->cache_directory = $directory_with_cache ?? $this->cache_directory;
-        $this->cache_file      = $this->cache_directory . $cache_id;
-        
-        if( $this->isCached() ){
-            die( $this->getCached() );
-        }
-
-        $this->startCaching();
+        $this->setOptions( $options );
     }
     
-    public static function isRequestMethodShouldBeCached( $request_type )
+    private function setOptions( CacheOptions $options )
     {
-        return in_array( $request_type, self::$request_types_to_cache, true );
+        $this->cache_directory        = $options->cache_directory        ?? $this->cache_directory;
+        $this->request_types_to_cache = $options->request_types_to_cache ?? $this->request_types_to_cache;
+        $this->allowed_ttl            = $options->allowed_ttl            ?? $this->allowed_ttl;
+    }
+    
+    public function isMethodShouldBeCached( $request_type ): bool
+    {
+        return in_array( $request_type, $this->request_types_to_cache, true );
+    }
+    
+    public function cache( Request $request ): void
+    {
+        $this->cache_file = $this->cache_directory . $request->path_id;
+        
+        if( $this->isCached() && ! $this->isModified() ){
+            die( $this->getCached() );
+        }
+        
+        $this->startCaching();
     }
     
     public function isCached(): bool
     {
         return file_exists( $this->cache_file );
+    }
+    
+    private function isModified()
+    {
+        return false;
     }
     
     public function getCached(): string
@@ -47,7 +76,12 @@ class Cache implements Serviceable
     
     public function endCaching( $data ): string
     {
-        file_put_contents( $this->cache_file, 'cache!<br>' . $data );
+        file_put_contents(
+            $this->cache_file,
+            'cache!<br>' . $data
+        );
+        
+        //@todo append metadata
         
         return $data;
     }

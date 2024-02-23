@@ -2,7 +2,7 @@
 
 namespace Safronik\Core\Exceptions;
 
-class Exception
+class Exception extends \Exception
 {
     
 }

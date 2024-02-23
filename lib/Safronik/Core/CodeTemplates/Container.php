@@ -16,6 +16,26 @@ trait Container
         $this->appendBulk( $services );
     }
     
+    public static function get( string $alias, mixed $params = [] ): mixed
+    {
+        $self  = static::isInitialized()
+            ? static::getInstance()
+            : throw new \Exception( 'Container ' . static::class . ' is not initialized yet. Please, do so before usage.' );
+        
+        $alias = $self->aliases[ $alias ] ?? $alias;
+        
+        return isset( $self->services[ $alias ] )
+            ? $self->services[ $alias ]( $params )
+            : throw new \Exception( "Service '$alias' not found Container" . static::class);
+    }
+    
+    public static function has( string $service ): bool
+    {
+        return static::isInitialized()
+            ? isset( self::getInstance()->services[ $service ] )
+            : throw new \Exception(static::class . ' is not initialized yet. Please, do so.');
+    }
+    
     protected function appendBulk( array $services ): void
     {
         foreach( $services as $alias => $service_name){
@@ -41,28 +61,8 @@ trait Container
                 : new $service( ...$params );
         };
     }
-    
-    public static function get( string $alias, mixed $params = [] ): mixed
-    {
-        $self  = static::isInitialized()
-            ? static::getInstance()
-            : throw new \Exception( 'Container ' . static::class . ' is not initialized yet. Please, do so before usage.' );
-        
-        $alias = $self->aliases[ $alias ] ?? $alias;
-        
-        return isset( $self->services[ $alias ] )
-            ? $self->services[ $alias ]( $params )
-            : throw new \Exception( "Service '$alias' not found Container" . static::class);
-    }
-    
-    public static function has( string $service ): bool
-    {
-        return static::isInitialized()
-            ? isset( self::getInstance()->services[ $service ] )
-            : throw new \Exception(static::class . ' is not initialized yet. Please, do so.');
-    }
 
-    private function addAlias( string|null $alias, string $service ): void
+    private function addAlias( string|null $alias, string|Service $service ): void
     {
         $alias = $alias ?? $service::getAlias();
         if( $alias ){

@@ -6,8 +6,8 @@ use Safronik\Apps\App;
 
 final class AppsManager extends App
 {
-    protected static string $slug    = 'apps';
-    protected static array  $options_to_load = ['installed_apps', 'enabled_apps', 'system_apps'];
+    protected static string $slug = 'apps';
+    protected static array $options_to_load = [ 'installed_apps', 'enabled_apps', 'system_apps' ];
     
     public function __construct( ...$params )
     {
@@ -30,4 +30,5 @@ final class AppsManager extends App
                 $data['dependencies'],
             );
         }
-    }}
+    }
+}

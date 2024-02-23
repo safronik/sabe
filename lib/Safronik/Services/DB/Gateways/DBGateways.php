@@ -15,7 +15,7 @@ final class DBGateways implements Containerable
     public function __construct( array $services = [], ?string $directory = null )
     {
         $directory  = $directory ?? __DIR__;
-        $classnames = $this->getAvailableFromFolder( $directory, 'DBGateway', true );
+        $classnames = $this->getAvailableFromDirectory( $directory, 'DBGateway', true );
         
         $this->appendBulk($classnames);
     }
@@ -33,7 +33,7 @@ final class DBGateways implements Containerable
         array_unshift( $params, DB::getInstance() );
     }
     
-    private function getAvailableFromFolder( $directory, $filter, $return_with_aliases = false ): array
+    private function getAvailableFromDirectory( $directory, $filter, $return_with_aliases = false ): array
     {
         $classes = [];
         $classes_with_aliases = [];

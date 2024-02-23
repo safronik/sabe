@@ -25,12 +25,12 @@ class Validator
     
     }
     
-    public function class( string|object $class ): ClassValidator
+    public static function class( string|object $class ): ClassValidator
     {
         return new ClassValidator( $class );
     }
 
-    public function app( string|object $class ): AppValidator
+    public static function app( string|object $class ): AppValidator
     {
         return new AppValidator( $class );
     }

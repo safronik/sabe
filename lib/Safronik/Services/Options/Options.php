@@ -3,12 +3,12 @@
 namespace Safronik\Services\Options;
 
 // Interfaces
-use Safronik\Services\Serviceable;
+use Safronik\Core\CodeTemplates\Installer;
 use Safronik\Core\CodeTemplates\Interfaces\Installable;
+use Safronik\Core\CodeTemplates\Interfaces\Serviceable;
+use Safronik\Core\CodeTemplates\Service;
 
 // Templates
-use Safronik\Core\CodeTemplates\Service;
-use Safronik\Core\CodeTemplates\Installer;
 
 class Options implements Serviceable, Installable
 {
@@ -18,9 +18,9 @@ class Options implements Serviceable, Installable
     protected static string $gateway_alias = 'options';
     
     protected ?array  $options_to_load = [];
-    protected array  $options_loaded = [];
-    protected array  $options_storage = [];
-    protected ?string $options_group = '';
+    protected array   $options_loaded  = [];
+    protected array   $options_storage = [];
+    protected ?string $options_group   = '';
     
     private DBOptionGatewayInterface $gateway;
     

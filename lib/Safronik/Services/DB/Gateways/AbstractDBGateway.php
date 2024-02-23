@@ -2,14 +2,13 @@
 
 namespace Safronik\Services\DB\Gateways;
 
-use Safronik\Services\DB\InnerInterfaces\DBSimpleAccess;
-use Safronik\Services\DB\InnerInterfaces\DBHelperMethodsInterface;
+use Safronik\Services\DB\DB;
 
 abstract class AbstractDBGateway implements  GatewayInterface
 {
-    protected DBSimpleAccess $db;
+    protected DB $db;
     
-    public function __construct( DBSimpleAccess|DBHelperMethodsInterface $db )
+    public function __construct( DB $db )
     {
         $this->db = $db;
     }

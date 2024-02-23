@@ -2,72 +2,69 @@
 
 namespace Safronik\Apps\Installer;
 
+use Safronik\Core\CodeTemplates\Interfaces\Installable;
+
 use Safronik\Services\DBStructureHandler\DBStructureHandler;
 use Safronik\Services\Options\Options;
 use Safronik\Services\DBStructureHandler\SQLScheme;
 use Safronik\Core\Validator\Validator;
-use Safronik\Core\CodeTemplates\Interfaces\Installable;
-use Safronik\Core\CodeTemplates\Interfaces\Eventable;
-use Safronik\Core\CodeTemplates\Event;
 
-class Installer implements Eventable
+class Installer
 {
-    use Event;
-    
     private Installable|string  $class;
-    private ?DBStructureHandler $db_handler;
+    private ?DBStructureHandler $db_structure;
     private ?Options            $option_handler;
     
     private string $slug;
     private array  $options;
     private array  $scheme;
     
+    /**
+     * @throws \Exception
+     */
     public function __construct(
         Installable|string $class,
         ?DBStructureHandler $db_handler = null,
         ?Options $option_handler = null
     ){
         $this->class          = $class;
-        $this->db_handler     = $db_handler;
+        $this->db_structure   = $db_handler;
         $this->option_handler = $option_handler;
+        
+        ! ( Validator::app( $this->class )->isInstallable() )
+            && throw new \Exception( 'App does not implements Installable interface' );
         
         $this->validateDBStructure()
             && $this->scheme  = $this->class::getScheme();
             
         $this->validateOptions()
-            && $this->slug    = $this->class::getSlug()
-            && $this->options = $this->class::getOptions();
+            && ( $this->slug    = $this->class::getSlug() )
+            && ( $this->options = $this->class::getOptions() );
     }
     
-    private function validateDBStructure()
+    private function validateDBStructure(): bool
     {
-        ! ( Validator::init()->app( $this->class )->isInstallable() )
-            && throw new \Exception( "App does not implements Installable interface." );
-    
-        ! ( Validator::init()->app( $this->class )->hasSQLScheme() && $this->db_handler )
-            && throw new \Exception( "No SQL scheme provided by $this->class or no DB handler passed to constructor" );
-        
-        return true;
+        \Safronik\Services\Event\Event::after( 'install', function(){} );
+        return Validator::app( $this->class )->hasSQLScheme() && $this->db_structure;
     }
     
-    private function validateOptions()
+    private function validateOptions(): bool
     {
-        ! ( Validator::init()->app( $this->class )->hasOptions() && $this->option_handler )
-            || throw new \Exception( "No options passed by $this->class or no options handler passed to constructor" );
-        
-        return true;
+        return Validator::app( $this->class )->hasOptions() && $this->option_handler;
     }
     
-    public function _install(): bool
+    public function install(): bool
     {
-        return ( isset( $this->scheme )               && $this->createDBStructure( $this->scheme ) ) ||
-               ( isset( $this->options, $this->slug ) && $this->prepareOptions( $this->options, $this->slug ) );
+        return
+            ( isset( $this->scheme )               && $this->createDBStructure( $this->scheme ) ) ||
+            ( isset( $this->options, $this->slug ) && $this->prepareOptions( $this->options, $this->slug ) );
     }
     
     public function update(): bool
     {
-        return ( isset( $this->scheme )               && $this->updateDBStructure( $this->scheme ) ) ||
-               ( isset( $this->options, $this->slug ) && $this->updateOptions( $this->options, $this->slug ) );
+        return
+            ( isset( $this->scheme )               && $this->updateDBStructure( $this->scheme ) ) ||
+            ( isset( $this->options, $this->slug ) && $this->updateOptions( $this->options, $this->slug ) );
     }
     
     public function uninstall(): bool
@@ -77,20 +74,25 @@ class Installer implements Eventable
             ( isset( $this->options, $this->slug ) && $this->deleteOptions( $this->options, $this->slug ) );
     }
     
+    /**
+     * @throws \Exception
+     */
     private function createDBStructure( array $scheme ): bool
     {
-        return $this->db_handler
-            ->setScheme( new SQLScheme( $scheme ) )
-            ->fix();
-    }
-
-    private function deleteDBStructure( array $scheme ): bool
-    {
-        return $this->db_handler
-            ->setScheme( new SQLScheme( $scheme ) )
-            ->drop();
+        return $this->db_structure->updateSchema( new SQLScheme( $scheme ) );
     }
     
+    /**
+     * @throws \Exception
+     */
+    private function deleteDBStructure( array $scheme ): bool
+    {
+        return $this->db_structure->dropSchema( new SQLScheme( $scheme ) );
+    }
+    
+    /**
+     * @throws \Exception
+     */
     private function deleteOptions( array $options_names, string $slug ): bool
 	{
         $out = true;
@@ -106,7 +108,10 @@ class Installer implements Eventable
         return $out;
 	}
     
-    private function _prepareOptions( $options_names, $slug ): bool
+    /**
+     * @throws \Exception
+     */
+    private function prepareOptions( $options_names, $slug ): bool
     {
         $out = true;
          $this->option_handler
@@ -126,6 +131,9 @@ class Installer implements Eventable
         return true;
     }
     
+    /**
+     * @throws \Exception
+     */
     private function updateDBStructure( array $scheme ): bool
     {
         return $this->createDBStructure( $scheme );

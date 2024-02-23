@@ -23,7 +23,7 @@ class TablesAnalyzer
      */
     private function checkCurrentScheme()
     {
-        foreach ( $this->scheme_to_check::get() as $scheme_table_name => $table_data ){
+        foreach ( $this->scheme_to_check->get() as $scheme_table_name => $table_data ){
 			
 	        $table_name = $this->db_gateway->getPrefix() . $this->db_gateway->getAppPrefix() . $scheme_table_name;
 	        if( ! $this->db_gateway->isTableExists( $table_name ) ){

@@ -4,7 +4,8 @@ namespace Safronik\Services\Visitor;
 
 class SQLScheme
 {
-    public static $scheme = [
+    private static $table_prefix = '';
+    private static $schema = [
         'visitors' => [
             'columns' => [
                 [ 'field' => 'visitor_id',        'type' => 'VARCHAR(64)',   'null' => 'no', ],
@@ -19,4 +20,14 @@ class SQLScheme
             ],
         ],
     ];
+    
+    public static function getTablePrefix(): string
+    {
+        return self::$table_prefix;
+    }
+    
+    public static function getSchema(): array
+    {
+        return self::$schema;
+    }
 }

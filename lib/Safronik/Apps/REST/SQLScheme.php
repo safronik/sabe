@@ -13,7 +13,7 @@ class SQLScheme
                 [ 'field' => 'app', 'type' => 'VARCHAR(1024)', 'null' => 'yes', 'default' => 'null', ],
             ],
             'indexes' => [
-                [ 'type' => 'PRIMARY', 'name' => 'KEY', 'body' => '(`page`)' ],
+                [ 'name' => 'PRIMARY', 'type' => 'KEY', 'body' => '(`page`)' ],
             ],
         ],
     ];

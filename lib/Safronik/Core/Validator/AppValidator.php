@@ -12,10 +12,9 @@ class AppValidator
 
     public function isInstallable(): bool
     {
-        return
-            Validator::init()
-                ->class( $this->app )
-                ->implements( Installable::class );
+        return Validator::init()
+                        ->class( $this->app )
+                        ->implements( Installable::class );
     }
     
     public function hasSQLScheme(): bool

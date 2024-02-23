@@ -23,7 +23,7 @@ class ColumnsAnalyzer
      */
     private $relevant_schema;
 	
-    private $field_standard = [
+    private array $field_standard = [
 		'field'   => '',
 		'type'    => '',
 		'null'    => 'yes',
@@ -31,9 +31,9 @@ class ColumnsAnalyzer
 		'extra'   => '',
 	];
 	
-    public $columns_to_create;
-    public $columns_to_delete;
-    public $columns_to_change;
+    public array $columns_to_create;
+    public array $columns_to_delete;
+    public array $columns_to_change;
 	
     public $changes_required;
     
@@ -42,11 +42,12 @@ class ColumnsAnalyzer
         $this->db_gateway = $db_gateway;
         $table_name       = $this->db_gateway->getPrefix() . $this->db_gateway->getAppPrefix() . $scheme_table_name;
         
-        $this->relevant_schema = $scheme::getByTableName( $scheme_table_name );
+        $this->relevant_schema = $scheme->getByTableName( $scheme_table_name );
         $this->relevant_schema = $this->convertSchemaToStandard( $this->relevant_schema['columns'] );
         
         $this->actual_schema = $this->db_gateway->getTableColumns( $table_name );
         $this->actual_schema = $this->convertSchemaToStandard( $this->actual_schema );
+        
         $this->execute();
         
         $this->changes_required = $this->columns_to_change || $this->columns_to_create || $this->columns_to_delete;
@@ -66,9 +67,7 @@ class ColumnsAnalyzer
             array_column($this->actual_schema, 'field'),
             array_column($this->relevant_schema, 'field')
         );
-
-        //var_dump( $this->relevant_schema);
-        //var_dump( $this->actual_schema);
+        
         $this->columns_to_change = array();
         foreach ( $this->relevant_schema as $relevant_column ) {
             foreach ( $this->actual_schema as $actual_column ) {
@@ -87,6 +86,8 @@ class ColumnsAnalyzer
         }
         
         $this->columns_to_change = array_unique($this->columns_to_change);
+        
+        
     }
 
     private function convertSchemaToStandard($schema)
@@ -99,7 +100,7 @@ class ColumnsAnalyzer
 				
                 $tmp_field_name  = strtolower($field_name);
                 $tmp_field_value = '';
-				
+                
                 if ( is_string($field_value) && $field_value !== 'null' ) {
                     $tmp_field_value = strtolower($field_value);
                     $tmp_field_value = preg_replace('@[\'"]@', '"', $tmp_field_value);
