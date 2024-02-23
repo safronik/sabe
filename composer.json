@@ -1,0 +1,9 @@
+{
+    "require-dev": {
+        "codeception/codeception": "@stable",
+        "codeception/module-db": "^3.1",
+        "codeception/module-phpbrowser": "*",
+        "codeception/module-asserts": "*",
+        "phpunit/dbunit": "*"
+    }
+}
