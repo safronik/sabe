@@ -1,6 +1,6 @@
 <?php
 
-namespace Safronik\Core\Variables;
+namespace Safronik\Core\Globals;
 
 class Post extends Variables{
 	
