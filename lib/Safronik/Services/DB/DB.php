@@ -27,37 +27,36 @@ class DB implements Serviceable{
     // Extensions
     use TableExtension;
     use PreparedQueryExtension;
-    // use SimpleAccessExtension;
-    use PDOPreparedQueryExtension;
+    // use PDOPreparedQueryExtension;
     use QueryBuilder;
     
     protected static string $service_alias = 'db';
     
-    public DBDriverInterface $driver;
+    private DBDriverInterface $driver;
     
     /** @var string Query string */
 	public $query = null;
     
     /** @var string Valid values are 'array'|'obj'|'num' */
-    public string $response_mode = 'array';
+    private string $response_mode = 'array';
     
 	/** @var mixed DB result. Could be anything, depends on a driver implementation */
 	public $result = '';
  
 	/** @var int Number of affected rows */
-	public int $rows_affected;
+	private int $rows_affected;
     
     /** @var int Number of selected rows  */
 	private int $rows_selected;
  
 	/** @var string Common DB prefix for all tables */
-    public string $db_prefix = '';
+    private string $db_prefix = '';
 	
 	/** @var string Application DB prefix used only by current application */
-    public $app_prefix = '';
+    private $app_prefix = '';
 	
 	/** @var string $this->db_prefix and $this->app_prefix combined */
-	public string $full_prefix;
+	private string $full_prefix;
     
     /**
      * @param DBConfig $config
@@ -79,16 +78,15 @@ class DB implements Serviceable{
 				break;
     
 			case 'Wordpress':
-				$driver_name = $driver_namespace . $config->driver;
-	            $this->driver    = new $driver_name(
+				$driver_name  = $driver_namespace . $config->driver;
+	            $this->driver = new $driver_name(
 					$config->connection
 	            );
 				break;
 		}
   
-		$this->db_prefix   = $config->db_prefix;
-		$this->app_prefix  = $config->app_prefix;
-		$this->full_prefix = $config->db_prefix . $config->app_prefix;
+		$this->db_prefix  = $config->db_prefix;
+		$this->app_prefix = $config->app_prefix;
 	}
     
     /**
@@ -141,8 +139,6 @@ class DB implements Serviceable{
     }
     
     /**
-     * Response mode setter
-     *
      * @param string $response_mode
      *
      * @return static
@@ -155,71 +151,29 @@ class DB implements Serviceable{
     }
     
     /**
-     * @param bool|int|string|null $value
-     * @param string               $type
-     *
-     * @return array|int|string|null
+     * @return mixed|string
      */
-    protected function sanitize( bool|int|string|null $value, string $type = 'string' ): array|int|string|null
+    public function getAppPrefix(): mixed
     {
-        switch($type){
-            case 'table':
-                $sanitized_value = preg_replace( '/[^\w\d._-]/', '', $value);
-                break;
-            case 'column_name':
-                $sanitized_value = preg_replace( '/[^\w\d._-]/', '', $value);
-                break;
-            case 'limit':
-                $sanitized_value = preg_replace( '/\D/', '', $value);
-                break;
-            case 'order_by':
-                $sanitized_value = preg_replace( '/[^\w\d._-]/', '', $value);
-                break;
-            case 'serve_word':
-                $sanitized_value = preg_replace('/[^\w\s]/', '', $value);
-                break;
-            case 'string':
-                $sanitized_value = $this->driver->sanitize( (string) $value );
-                break;
-            case 'int':
-                $sanitized_value =  (int) $value;
-                break;
-            case 'bool':
-                $sanitized_value =  $value ? 'TRUE' : 'FALSE';
-                break;
-            case 'null':
-                $sanitized_value =  'NULL';
-                break;
-                
-            // Consider empty type as a 'string' type
-	        default:
-				$sanitized_value = $this->sanitize( $value );
-				break;
-        }
-        
-        return $sanitized_value;
+        return $this->app_prefix;
     }
     
     /**
-     * @param bool|int|string $value
-     * @param string          $type
-     *
-     * @return int|string
-     * @throws \Exception
+     * @param mixed|string $app_prefix
      */
-    protected function castBinds( bool|int|string $value, string $type ): int|string
+    public function setAppPrefix( mixed $app_prefix ): void
     {
-        switch( $type ){
-            case 'string':
-                return (string)$value;
-            case 'int':
-                return (int)$value;
-            case 'bool':
-                return $value ? 'TRUE' : 'FALSE';
-            case 'null':
-                return 'NULL';
-            default:
-                throw new \Exception( 'Not supported cast type' );
-        }
+        $this->app_prefix  = $app_prefix;
+        $this->full_prefix = $this->db_prefix . $this->app_prefix;
+    }
+    
+    public function getRowsAffected(): int
+    {
+        return $this->rows_affected;
+    }
+    
+    public function getRowsSelected(): int
+    {
+        return $this->rows_selected;
     }
 }

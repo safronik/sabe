@@ -12,7 +12,7 @@ trait PDOPreparedQueryExtension
     /**
      * @var bool Show if the prepared query contains placeholders
      */
-    public $query_is_prepared = false;
+    private $query_is_prepared = false;
     
 	public $execute_result = '';
     

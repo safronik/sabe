@@ -36,9 +36,10 @@ class DBConfig{
     {
         // Getting config from deafult file if params is not passed
         if( empty( $params ) ){
+            
             // @todo use file storage instead of direct file attachment
             /** @var array $db_config */
-            require_once \SABE_CONFIG . 'db_config.php';
+            require_once \SABE_CONFIG . 'db.php';
             $params = $db_config;
             unset( $db_config );
         }

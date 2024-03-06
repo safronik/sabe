@@ -53,9 +53,6 @@ trait SchemaExtension{
         return $column_schema;
     }
     
-    
-    
-    
     public static function convertTableSchemaFromSQLNotation( $table_schema )
     {
         return array_map(
@@ -73,9 +70,6 @@ trait SchemaExtension{
         
         return $column_schema;
     }
-    
-    
-    
     
     /**
 	 * @param $table

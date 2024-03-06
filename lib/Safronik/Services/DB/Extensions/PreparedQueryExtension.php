@@ -13,14 +13,14 @@ trait PreparedQueryExtension
      * Doesn't create a prepared statement.
      * Look for $this->prepare if you want to make multiple similar queries.
      *
-     * @param array       $values
-     * @param string|null $query
+     * @param string $query
+     * @param array  $values
      *
      * @return static
      */
-	public function prepare( array $values, string $query = null ): static
+	public function prepare( string $query, array $values ): static
     {
-        $this->query                = $query ?? $this->query;
+        $this->query                = $query;
         $values                     = $this->parseValues( $values );
         $this->named_placeholders   = $this->getNamedPlaceholders( $values );
         $this->unnamed_placeholders = $this->getUnnamedPlaceholders( $values );
@@ -28,12 +28,20 @@ trait PreparedQueryExtension
         $this->named_placeholders   && $this->preparePlaceholders( $this->named_placeholders,   'named' );
         $this->unnamed_placeholders && $this->preparePlaceholders( $this->unnamed_placeholders, 'unnamed' );
         
+        $this->cleanUpPlaceholders();
+        
         return $this;
 	}
     
     private function parseValues( $values )
     {
-        array_walk($values, static function( &$value, $key ){ $value = ! is_array( $value ) ? [ $value ] : $value; } );
+        array_walk(
+            $values,
+            static function( &$value, $name ){
+                $value = ! is_array( $value )  ? [ $value,    'string' ] : $value; // Append type if scalar     passed
+                $value = count( $value ) === 1 ? [ $value[0], 'string' ] : $value; // Append type if only value passed
+            },
+        );
         
         return $values;
     }
@@ -42,9 +50,10 @@ trait PreparedQueryExtension
     {
         return array_filter(
             $placeholders,
-            static function( $placeholder ){
-                return count( $placeholder ) === 3 || preg_match( '@^:[a-z]@', $placeholder[0] );
-            }
+            static function( $value, $name ){
+                return count( $value ) === 3 || preg_match( '@^:[a-zA-Z0-9_-]+$@', $name );
+            },
+            ARRAY_FILTER_USE_BOTH
         );
     }
     
@@ -52,9 +61,10 @@ trait PreparedQueryExtension
     {
         return array_filter(
             $placeholders,
-            static function( $placeholder ){
-                return count( $placeholder ) === 1 || ! preg_match( '@^:[a-z]@', $placeholder[0] );
-            }
+            static function( $value, $name ){
+                return is_int( $name );
+            },
+            ARRAY_FILTER_USE_BOTH
         );
     }
     
@@ -67,14 +77,14 @@ trait PreparedQueryExtension
      *
      * @return static
      */
-    public function preparePlaceholders( array $values = array(), string $placeholders_type = 'unnamed' ): static
+    private function preparePlaceholders( array $values = [], string $placeholders_type = 'unnamed' ): static
     {
         if( $placeholders_type === 'named'){
-            foreach( $values as $value_data ){
+            foreach( $values as $name => $value ){
                 $this->preparePlaceholder(
-                    $value_data[1],
-                    $value_data[2] ?? 'string',
-                    $value_data[0]
+                    $value[0],
+                    $value[1],
+                    $name
                 );
             }
         }
@@ -83,7 +93,7 @@ trait PreparedQueryExtension
             for($i = 0, $value_size = count($values); $i < $value_size; $i++){
                 $this->preparePlaceholder(
                     $values[ $i ][0],
-                    $values[ $i ][1] ?? 'string'
+                    $values[ $i ][1]
                 );
             }
         }
@@ -101,11 +111,63 @@ trait PreparedQueryExtension
      *
      * @return void
      */
-    public function preparePlaceholder( string|int $value, string $type = 'string', string $name = null ): void
+    private function preparePlaceholder( string|int $value, string $type = 'string', string $name = null ): void
     {
         $sanitized_value = $this->sanitize( $value, $type );
         $this->query     = $name
-            ? preg_replace( '@' . $name . '@',            $sanitized_value,       $this->query, 1 )
+            ? preg_replace( '@' . $name . '(?=[^a-zA-Z0-9_-]{1})@',            $sanitized_value,       $this->query)
             : preg_replace( '/\s?\?\s?/', ' ' . $sanitized_value . ' ', $this->query, 1 );
+    }
+    
+    private function cleanUpPlaceholders(): void
+    {
+        $this->named_placeholders   = [];
+        $this->unnamed_placeholders = [];
+    }
+    
+    /**
+     * @param bool|int|string|null $value
+     * @param string               $type
+     *
+     * @return array|int|string|null
+     */
+    private function sanitize( bool|int|string|null $value, string $type = 'string' ): array|int|string|null
+    {
+        switch($type){
+            case 'table':
+                $sanitized_value = preg_replace( '/[^\w\d._-]/', '', $value);
+                break;
+            case 'column_name':
+                $sanitized_value = preg_replace( '/[^*\w\d._-]/', '', $value);
+                break;
+            case 'limit':
+                $sanitized_value = preg_replace( '/\D/', '', $value);
+                break;
+            case 'order_by':
+                $sanitized_value = preg_replace( '/[^\w\d._-]/', '', $value);
+                break;
+            case 'serve_word':
+                $sanitized_value = preg_replace('/[^\w\s]/', '', $value);
+                break;
+            case 'string':
+                $sanitized_value = $this->driver->sanitize( (string) $value );
+                break;
+            case 'int':
+                $sanitized_value =  (int) $value;
+                break;
+            case 'bool':
+                $sanitized_value =  $value ? 'TRUE' : 'FALSE';
+                break;
+            case 'null':
+                $sanitized_value =  'NULL';
+                break;
+                
+            // Consider empty type as a 'string' type
+	        default:
+				$sanitized_value = $this->sanitize( $value );
+				break;
+        }
+        
+        return $sanitized_value;
     }
 }

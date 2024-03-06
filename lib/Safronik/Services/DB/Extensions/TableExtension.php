@@ -17,8 +17,8 @@ trait TableExtension{
     {
         return (bool) $this
             ->prepare(
-                [ [ ':table_name', $table, ], ],
-                'SHOW TABLES LIKE :table_name'
+                'SHOW TABLES LIKE :table_name;',
+                [ ':table_name' => $table ]
             )
             ->query()
             ->fetchAll();
@@ -34,7 +34,9 @@ trait TableExtension{
 	public function dropTable( $table ): bool
     {
         return  ! $this->isTableExists( $table ) ||
-                    ! $this->prepare( [[ ':table_name', $table, 'serve_word' ], ], 'DROP TABLE :table_name' )
+                    ! $this->prepare(
+                        'DROP TABLE :table_name',
+                        [ ':table_name' => [ $table, 'serve_word' ], ] )
                     ->query()
                     ->isTableExists( $table );
 	}

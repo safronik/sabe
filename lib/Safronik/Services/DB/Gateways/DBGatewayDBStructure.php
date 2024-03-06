@@ -30,7 +30,9 @@ class DBGatewayDBStructure extends AbstractDBGateway implements DBGatewayDBStruc
     {
         return $this->db
             ->setResponseMode( 'array' )
-            ->prepare( [ [ ':table', $table, 'table' ] ], 'SHOW COLUMNS FROM :table' )
+            ->prepare(
+                'SHOW COLUMNS FROM :table;',
+                [ ':table' => [ $table, 'table' ] ] )
             ->query()
             ->fetchAll();
     }
