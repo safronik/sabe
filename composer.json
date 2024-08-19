@@ -1,9 +1,19 @@
 {
+    "minimum-stability": "dev",
     "require-dev": {
         "codeception/codeception": "@stable",
         "codeception/module-db": "^3.1",
         "codeception/module-phpbrowser": "*",
         "codeception/module-asserts": "*",
-        "phpunit/dbunit": "*"
+        "phpunit/dbunit": "*",
+
+        "safronik/code-patterns": "*",
+        "safronik/globals": "*",
+        "safronik/helpers": "*"
+    },
+    "require": {
+        "ramsey/uuid": "^4.7",
+        "safronik/db-wrapper": "dev-master",
+        "safronik/db-migrator": "dev-master"
     }
 }

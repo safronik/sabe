@@ -5,6 +5,11 @@
 node_modules/
 vendor/
 
+# project files
+App
+AppSabe
+config
+
 # ignore log files and databases
 *.log
 *.sql
