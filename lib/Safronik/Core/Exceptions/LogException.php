@@ -2,7 +2,7 @@
 
 namespace Safronik\Core\Exceptions;
 
-class Log extends Exception
+class LogException extends Exception
 {
     
 }
