@@ -7,6 +7,8 @@ namespace Safronik\Core\Data;
  * by exposing properties which represent each key of the array
 */
 
+use Safronik\Helpers\DataHelper;
+
 class Storage implements Storageable
 {
     protected mixed $storage = [];
@@ -16,7 +18,7 @@ class Storage implements Storageable
      */
     private bool $extract_JSON;
     
-    public function __construct( mixed $properties = [], $extract_JSON = false )
+    public function __construct( array $properties = [], bool $extract_JSON = false )
     {
         $this->extract_JSON = $extract_JSON;
         $this->assignProperties( $properties );
@@ -25,7 +27,7 @@ class Storage implements Storageable
     private function assignProperties( $properties ): void
     {
         if( is_string($properties) && $this->extract_JSON ){
-            $properties = Helper::unpackIfJSON( $properties ) ?: $properties;
+            $properties = DataHelper::unpackIfJSON( $properties ) ?: $properties;
             if( is_scalar($properties) ){
                 $this->assignProperty(0, $properties);
                 
@@ -41,8 +43,7 @@ class Storage implements Storageable
     private function assignProperty( $name, $value ): void
     {
         if( $this->extract_JSON ){
-            $value = Helper::unpackIfJSON( $value ) ?: $value;
-            //var_dump( $value);
+            $value = DataHelper::unpackIfJSON( $value ) ?: $value;
         }
         $this->storage[ $name ] = is_array( $value )
             ? $this->createComplexProperty( $value )
@@ -73,14 +74,13 @@ class Storage implements Storageable
     {
         foreach( $data as $name => &$value ){
             if( $this->extract_JSON ){
-                $value = Helper::unpackIfJSON( $value ) ?: $value;
+                $value = DataHelper::unpackIfJSON( $value ) ?: $value;
             }
             if( is_array( $value ) ){
                 $value = new self( $value, $extract_json );
             }
         }
     }
-
     
 	public function truncate()
 	{
@@ -125,7 +125,7 @@ class Storage implements Storageable
     /*** IteratorAggregate methods **/
     public function getIterator()
     {
-        return new \ArrayIterator($this->storage);
+        return new \ArrayIterator($this->storage );
     }
     
     /*** Serialize methods **/
