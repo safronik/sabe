@@ -8,7 +8,7 @@ use Safronik\Controllers\Exceptions\ControllerException;
 use Safronik\Helpers\SanitizerHelper;
 use Safronik\Helpers\ValidationHelper;
 use Safronik\Models\Entities\EntityObject;
-use Safronik\Models\Services\Service;
+use Safronik\Models\Services\EntityService;
 use Safronik\Views\Api\Rest\RestView;
 
 abstract class RestController extends ApiController{
@@ -16,7 +16,7 @@ abstract class RestController extends ApiController{
     private string $entity_name;
     /** @var EntityObject  */
     private string $entity_class;
-    /** @var Service  */
+    /** @var EntityService  */
     private string $service_class;
     
     protected function init(): void
