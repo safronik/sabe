@@ -3,7 +3,8 @@
 namespace Safronik\Controllers\Extensions\AuthApiKey;
 
 use Safronik\Controllers\Extensions\AuthApiKey\Exceptions\AuthApiKeyExtensionException;
-use Safronik\Helpers\ValidationHelper;
+use Safronik\Core\ValidationHelper;
+use Safronik\Models\Entities\Rule;
 
 trait AuthApiKeyExtension{
     
@@ -20,7 +21,7 @@ trait AuthApiKeyExtension{
      *
      * @return string
      */
-    abstract public function getApiKey(): string;
+    abstract protected function getApiKey(): string;
     
     /**
      * Validates API key by rule
@@ -35,8 +36,8 @@ trait AuthApiKeyExtension{
      */
     protected function checkApiKey( $api_key = null ): void
     {
-        // Skip
-        if( $this->getApiKey() === '' ){
+        // No API key
+        if( ! $this->getApiKey() ){
             return;
         }
         
@@ -44,7 +45,7 @@ trait AuthApiKeyExtension{
             $api_key
                 ? [ 'api_key' => $api_key ]
                 : $this->request->parameters,
-            static::$rules
+            array_map( static fn( $rule ) => new Rule( $rule ), static::$rules )
         );
         
         $this->getApiKey() !== $this->request->parameters['api_key'] &&

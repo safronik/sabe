@@ -13,9 +13,9 @@ class ControllerException extends \Exception{
 
     public function __construct( string $message = "", int $code = 0, ?array $m2m_message = null )
     {
-        parent::__construct( $message, $code );
-        
         $this->m2m_message = $m2m_message;
+
+        parent::__construct( $message, $code );
     }
     
     /**

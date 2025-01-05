@@ -1,24 +1,24 @@
 <?php
 
-namespace Extensions\ApiCallLimit\Schema;
+namespace Safronik\Controllers\Extensions\ApiCallLimit\Schema;
 
 use Safronik\DBMigrator\Objects\Column;
 use Safronik\DBMigrator\Objects\Index;
-use Safronik\DBMigrator\Objects\Schemas;
+use Safronik\DBMigrator\Objects\Schema;
 use Safronik\DBMigrator\Objects\Table;
 
-class ApiCallLimitExtensionSchema extends Schemas{
+class ApiCallLimitExtensionSchema extends Schema{
     
     public function __construct( array $schemas = [] )
     {
-        parent::__construct( self::getScheme() );
+        parent::__construct( self::getSchema() );
     }
     
     /**
      * @return Table[]
      * @throws \Safronik\DBMigrator\Exceptions\DBMigratorException
      */
-    public static function getScheme(): array
+    public static function getSchema(): array
     {
         return [
             new Table(

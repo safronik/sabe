@@ -2,7 +2,7 @@
 
 namespace Safronik\Views\Api;
 
-use Safronik\Models\Entities\EntityObject;
+use Safronik\Models\Entities\Entity;
 
 class ApiResponse{
     
@@ -32,11 +32,11 @@ class ApiResponse{
         $data = is_array( $data ) ? $data : [ $data ];
         
         foreach( $data as &$datum ){
-            if( $datum instanceof EntityObject ){
+            if( $datum instanceof Entity ){
                 $datum = $datum->toArray();
             }
-        }
-        
+        } unset( $datum );
+
         $this->data       = $data;
         $this->data_count = count( $data );
     }

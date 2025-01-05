@@ -9,6 +9,7 @@ vendor/
 App
 AppSabe
 config
+runtime
 
 # ignore log files and databases
 *.log

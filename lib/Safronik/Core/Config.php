@@ -107,7 +107,7 @@ class Config{
             static fn( $classes ) =>
                 array_filter(
                     $classes,
-                    static fn( $class ) => is_subclass_of( $class, \Safronik\Models\Entities\EntityObject::class)
+                    static fn( $class ) => is_subclass_of( $class, \Safronik\Models\Entities\Entity::class)
                 )
         );
         

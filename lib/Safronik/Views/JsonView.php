@@ -4,25 +4,47 @@ namespace Safronik\Views;
 
 class JsonView extends BaseView{
     
-    public function init()
+    public function init(): void
     {
         header( 'Content-Type: application/json' );
     }
-    
-    public function setData( $data )
+
+    /**
+     * @throws \JsonException
+     */
+    public function render(): ViewInterface
     {
-        $this->data = $data;
+        echo json_encode(
+            [
+                'data'=> $this->data,
+                'message' => $this->message,
+            ],
+            JSON_THROW_ON_ERROR
+        );
+        http_response_code( $this->response_code );
+
+        return $this;
     }
-    
-    public function render( $output, $http_response_code = 200 )
+
+    public function renderError(\Exception $exception): ViewInterface
     {
-        echo json_encode( $output, JSON_THROW_ON_ERROR );
-        
-        is_int( $http_response_code )
-            ? http_response_code( $http_response_code )
-            : http_response_code( '500' );
-        
-        exit( 0 );
+        return $this
+            ->setData( [ 'error' => $exception->getMessage() ] )
+            ->setResponseCode( $exception->getCode() )
+            ->render();
     }
-    
+
+    public function renderMessage(string $message): ViewInterface
+    {
+        return $this
+            ->setMessage( $message )
+            ->render();
+    }
+
+    public function renderData(object|array $data): ViewInterface
+    {
+        return $this
+            ->setData( $data )
+            ->render();
+    }
 }

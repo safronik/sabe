@@ -12,19 +12,18 @@ use Safronik\DB\DBConfig;
  */
 readonly class Core
 {
-    /**
-     * Core constructor.
-     */
     public function __construct( string $root_dir, array $additional_config = [] )
     {
         try{
             $this->configure(
                 $root_dir,
                 $additional_config
-                    ?? [ 'dirs' => [
-                        'root'    => $root_dir,
-                        'runtime' => $root_dir . DIRECTORY_SEPARATOR . 'runtime',
-                    ] ]
+                    ?? [
+                        'dirs' => [
+                            'root'    => $root_dir,
+                            'runtime' => $root_dir . DIRECTORY_SEPARATOR . 'runtime',
+                        ],
+                    ]
             );
             $this->setErrorReportingLevel();
             $this->setupDiContainer();
@@ -62,15 +61,14 @@ readonly class Core
         }
     }
     
-    private function setupDiContainer()
+    private function setupDiContainer(): void
     {
-        // $vendor_safronik_dir = $root_dir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'safronik';
-        // $di_class_map = array_merge(
-        //     DI::getClassMapForDirectory( $root_dir . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'Safronik', '\Safronik' ),
-        //     DI::getClassMapForDirectory( $vendor_safronik_dir . DIRECTORY_SEPARATOR . 'db-wrapper' . DIRECTORY_SEPARATOR . 'src', '\Safronik\DB' ),
-        //     DI::getClassMapForDirectory( $vendor_safronik_dir . DIRECTORY_SEPARATOR . 'db-migrator' . DIRECTORY_SEPARATOR . 'src', '\Safronik\DBMigrator' ),
-        // );
-        
+//         $vendor_safronik_dir = $root_dir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'safronik';
+//         $di_class_map = array_merge(
+//             DI::getClassMapForDirectory( $root_dir . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'Safronik', '\Safronik' ),
+//             DI::getClassMapForDirectory( $vendor_safronik_dir . DIRECTORY_SEPARATOR . 'db-wrapper' . DIRECTORY_SEPARATOR . 'src', '\Safronik\DB' ),
+//             DI::getClassMapForDirectory( $vendor_safronik_dir . DIRECTORY_SEPARATOR . 'db-migrator' . DIRECTORY_SEPARATOR . 'src', '\Safronik\DBMigrator' ),
+//         );
         DI::initialize(
             Config::get('di.class_map'),
             Config::get('di.interface_map')
@@ -86,6 +84,6 @@ readonly class Core
      */
     private function initializeModules(): void
     {
-    
+
     }
 }

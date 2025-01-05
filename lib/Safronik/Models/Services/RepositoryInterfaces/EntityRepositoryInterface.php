@@ -2,7 +2,8 @@
 
 namespace Safronik\Models\Services\RepositoryInterfaces;
 
-use Safronik\Models\Entities\EntityObject;
+use Safronik\Models\Entities\Entity;
+use Safronik\Models\Entities\Value;
 
 interface EntityRepositoryInterface{
     
@@ -10,12 +11,11 @@ interface EntityRepositoryInterface{
     // public function setEntity( $entity_classname ): void;
     
     /** CRUD */
-    public function create( array $data ): array|EntityObject;
-    public function read( array $condition = [], ?int $amount = null, ?int $offset = null ): array|EntityObject;
-    public function save( EntityObject|array $items ): array;
+    public function create( Value|Entity $current ): void;
+    public function read( array $condition = [], ?int $amount = null, ?int $offset = null ): array|Entity;
+    public function save( array|Value|Entity $entities ): void;
     public function delete( $condition ): ?int;
     
     /** Additional */
     public function count( array $condition ): int;
-    
 }

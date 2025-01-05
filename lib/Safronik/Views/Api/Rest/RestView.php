@@ -4,22 +4,22 @@ namespace Safronik\Views\Api\Rest;
 
 use Safronik\Controllers\Exceptions\ControllerException;
 use Safronik\Views\Api\ApiView;
-
+use Safronik\Views\ViewInterface;
 
 class RestView extends ApiView{
-    
+
     /**
      * Redefine to add available actions to error response
      *
-     * @param \Exception $exception
+     * @param array $available_actions
      *
-     * @return void
+     * @param \Exception $exception
+     * @return ViewInterface
      */
-    public function outputError( \Exception $exception, array $available_actions = [] ): void
+    public function renderError( \Exception $exception, array $available_actions = [] ): ViewInterface
     {
         // Not implemented
-        if( $exception->getCode() === 501 && $available_actions ){
-            
+        if( $exception->getCode() === 501 ){
             $exception = new ControllerException(
                 $exception->getMessage(),
                 501,
@@ -27,6 +27,6 @@ class RestView extends ApiView{
             );
         }
         
-        parent::outputError( $exception );
+        return parent::renderError( $exception );
     }
 }

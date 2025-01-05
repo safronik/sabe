@@ -2,45 +2,108 @@
 
 namespace Safronik\Views\Api;
 
+use Safronik\CodePatterns\Exceptions\ContainerException;
 use Safronik\CodePatterns\Structural\DI;
 use Safronik\Controllers\Exceptions\ControllerException;
 use Safronik\Globals\Header;
-use Safronik\Models\Entities\EntityObject;
+use Safronik\Views\BaseView;
 use Safronik\Views\JsonView;
+use Safronik\Views\ViewInterface;
+use Safronik\Views\XmlView;
 
-class ApiView{
+class ApiView extends BaseView{
     
-    private string $view_type;
-    
-    public function __construct( string $view_type = JsonView::class )
+    private ViewInterface $view;
+
+    /**
+     * @throws ContainerException
+     */
+    public function init(): void
     {
-        $this->view_type = match( true ){
-            str_contains( Header::get('accept'), 'application/json') => JsonView::class,
-            // str_contains( Header::get('accept'), 'application/xml')  => XmlView::class,
-            default => $view_type,
-        };
-
+        $this->view = DI::get($this->detectViewType());
     }
-    
-    public function outputError( \Exception $exception ): void
+
+    private function detectViewType(): string
+    {
+        return match( true ){
+            str_contains( Header::get('accept'), 'application/json') => JsonView::class,
+            str_contains( Header::get('accept'), 'application/xml')  => XmlView::class,
+            default => JsonView::class,
+        };
+    }
+
+    public function render(): ViewInterface
+    {
+        $this->view->render();
+        http_response_code( $this->response_code );
+
+        return $this;
+    }
+
+    public function renderError(\Exception $exception ): ViewInterface
     {
         $response = new ApiResponse();
-        
         $response->setError( true);
         $response->setMessage( $exception->getMessage() );
         $exception instanceof ControllerException
             && $response->setM2mMessage( $exception->getM2mMessage() );
         
-        DI::get( $this->view_type )->render( $response, $exception->getCode() );
+        return $this->view
+            ->setData($response)
+            ->setResponseCode( $exception->getCode() )
+            ->render();
     }
     
-    public function outputSuccess( array|EntityObject $data, string $message = '' ): void
+    public function renderMessage( string $message ): ViewInterface
     {
         $response = new ApiResponse();
-        
-        $response->setMessage( $message);
+        $response->setMessage( $message );
+
+        $this
+            ->setData($response)
+            ->setResponseCode($this->response_code)
+            ->render();
+
+        return $this;
+    }
+
+    public function renderData(object|array $data): ViewInterface
+    {
+        $response = new ApiResponse();
         $response->setData( $data );
-        
-        DI::get( $this->view_type )->render( $response, 200 );
+
+        return $this->view
+            ->setData( $response )
+            ->setResponseCode($this->response_code)
+            ->render();
+    }
+
+    /**
+     * @param mixed $data
+     * @return ViewInterface
+     */
+    public function setData( mixed $data ): ViewInterface
+    {
+        $this->view->data = $data;
+
+        return $this;
+    }
+
+    public function setMessage( string $message ): ViewInterface
+    {
+        $this->view->message = $message;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed $response_code
+     * @return ViewInterface
+     */
+    public function setResponseCode( int $response_code ): ViewInterface
+    {
+        $this->view->response_code = $response_code;
+
+        return $this;
     }
 }
