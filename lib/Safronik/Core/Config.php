@@ -65,11 +65,11 @@ class Config{
      * - key: 'common'
      * - until: 'middlewares'
      * Will return values for requests:
-     *  - middleware.controllers.api.rest.user.get
-     *  - middleware.controllers.api.rest.user.common
-     *  - middleware.controllers.api.rest.common
-     *  - middleware.controllers.api.common
-     *  - middleware.controllers.common
+     *  - middlewares.controllers.api.rest.user.get
+     *  - middlewares.controllers.api.rest.user.common
+     *  - middlewares.controllers.api.rest.common
+     *  - middlewares.controllers.api.common
+     *  - middlewares.controllers.common
      *
      * @param string $request
      * @param string $keyToAppend
