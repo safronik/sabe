@@ -84,7 +84,11 @@ final class EntityManager{
             ? array_intersect_key( $this->entityMap[ $classname ], array_flip( $cached_ids ) ) // Get from cache
             : $this
                 ->getRepo( $classname )
-                ->read( $condition, $amount, $offset );     // Database request
+                ->read(
+                    $condition,
+                    $amount,
+                    $offset
+                );
 
         $cached_ids
             || $this->cacheRequest( $classname, $hash, $entities );
@@ -158,12 +162,13 @@ final class EntityManager{
     }
 
     /**
-     * @param Entity $entity
+     * @param Entity|string $entity
+     *
      * @return EntityRepository
-     * @throws ContainerException
-     * @throws Exception
+     *
+     * @throws ContainerException|Exception
      */
-    private function getRepo( string|Entity $entity ): EntityRepository
+    private function getRepo( Entity|string $entity ): EntityRepository
     {
         $classname = is_string( $entity ) ? $entity : $entity::class;
 

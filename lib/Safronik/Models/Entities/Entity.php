@@ -15,7 +15,12 @@ abstract class Entity extends Value{
     protected static function createRules(): void
     {
         $rules = self::RULES;
-        array_walk( $rules, static function( &$rule, $name ){ $rule = new Rule( $rule, $name ); } );
+        array_walk(
+            $rules,
+            static function( &$rule, $name ){
+                $rule = new Rule( $rule, $name );
+            }
+        );
         static::$rules = array_merge( static::$rules, $rules );
 
         parent::createRules();

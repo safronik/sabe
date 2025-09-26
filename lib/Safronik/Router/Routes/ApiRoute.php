@@ -14,8 +14,9 @@ final class ApiRoute extends AbstractRoute
         try{
             $this->ensureIsAvailable();
         }catch( RouterException $exception ){
-            $this->setEndpoint('ShowEndpoints')
-                 ->ensureIsAvailable();
+            $this
+                ->setEndpoint('ShowEndpoints')
+                ->ensureIsAvailable();
         }
     }
 }

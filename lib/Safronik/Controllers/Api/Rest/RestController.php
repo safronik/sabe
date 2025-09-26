@@ -19,6 +19,19 @@ use Safronik\Views\ViewInterface;
 
 abstract class RestController extends ApiController{
 
+    public const METHOD_NAME_POST   = 'post';
+    public const METHOD_NAME_GET    = 'get';
+    public const METHOD_NAME_PUT    = 'put';
+    public const METHOD_NAME_DELETE = 'delete';
+    public const METHOD_NAME_LIST   = 'list';
+    public const METHODS_NAMES = [
+        self::METHOD_NAME_POST,
+        self::METHOD_NAME_GET,
+        self::METHOD_NAME_PUT,
+        self::METHOD_NAME_DELETE,
+        self::METHOD_NAME_LIST
+    ];
+
     private string|Entity            $entity_class;
     private string                   $entity_name;
     private EntityManager            $entityManager;
@@ -88,8 +101,15 @@ abstract class RestController extends ApiController{
      */
     protected function get(): void
     {
-        $paginationParameters = array_filter( $this->request->parameters, static fn($key) => in_array( $key, ['page','offset','amount'] ), ARRAY_FILTER_USE_KEY);
-        $conditionParameters  = array_diff_assoc( $this->request->parameters, $paginationParameters );
+        $paginationParameters = array_filter(
+            $this->request->parameters,
+            static fn($key) => in_array( $key, ['page','offset','amount'] ),
+            ARRAY_FILTER_USE_KEY
+        );
+        $conditionParameters = array_diff_assoc(
+            $this->request->parameters,
+            $paginationParameters
+        );
 
         ValidationHelper::         validate( $conditionParameters, $this->entity_class::rules() );
         ValidationHelper::validateRedundant( $conditionParameters, $this->entity_class::rules() );
@@ -157,19 +177,19 @@ abstract class RestController extends ApiController{
         $this->view->renderMessage( "$this->entity_name with id $deleted_id is deleted" );
     }
 
-//    /**
-//     * List entities
-//     *
-//     * @return void
-//     * @throws \Exception
-//     */
-//    protected function list(): void
-//    {
-//        $this->get();
-//    }
+    /**
+     * List entities
+     *
+     * @return void
+     * @throws Exception
+     */
+    protected function list(): void
+    {
+        $this->get();
+    }
 
     /**
-     * Returns last key from the route which is exactly the name of the entity
+     * Returns a last key from the route which is exactly the name of the entity
      *
      * @return string
      */
@@ -229,7 +249,11 @@ abstract class RestController extends ApiController{
             $exception,
             $this->getEndpoints() +
             $this->getEndpoints(
-                static fn( $method ) => in_array( $method->getName(), [ 'post', 'get', 'put', 'delete', 'list' ] )
+                static fn( $method ) => in_array(
+                    $method->getName(),
+                    self::METHODS_NAMES,
+                    true
+                )
             )
         );
     }

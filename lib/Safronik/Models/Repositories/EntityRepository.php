@@ -14,8 +14,8 @@ class EntityRepository extends BaseRepository implements EntityRepositoryInterfa
     use EntityRepositoryReader;
 
     protected string $table;
-    /** @var string|Entity Contains classname */
-    protected string|Entity $entity;
+    /** @var Entity|string Contains classname */
+    protected Entity|string $entity;
     
     /**
      * @param string|Entity $entity Entity classname or EntityObject
@@ -23,7 +23,7 @@ class EntityRepository extends BaseRepository implements EntityRepositoryInterfa
      *
      * @throws \Exception
      */
-    public function __construct( DB $db, string|Entity $entity )
+    public function __construct( DB $db, Entity|string $entity )
     {
         parent::__construct( $db );
         
@@ -35,7 +35,10 @@ class EntityRepository extends BaseRepository implements EntityRepositoryInterfa
     {
         $values  = $current->toArray( true);
         $columns = $current::fields( Obj::filterExceptType( 'scalar' ) ) ;
-        $columns = array_filter( $columns, static fn( $column ) => array_key_exists( $column, $values ) );
+        $columns = array_filter(
+            $columns,
+            static fn( $column ) => array_key_exists( $column, $values )
+        );
 
         if( ! $parent ){
 

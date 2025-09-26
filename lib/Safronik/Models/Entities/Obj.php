@@ -23,11 +23,12 @@ abstract class Obj{
     public function __construct( $data = [] )
     {
         // Hydration
-        $data && $this->hydrate( (array) $data );
+        $data
+            && $this->hydrate( (array) $data );
         
         // Initialization with parameters
         method_exists( static::class, 'init')
-            && static::init( $data );
+            && $this->init();
     }
     
     public function toArray( $scalar_only = false ): array
