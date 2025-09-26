@@ -53,7 +53,59 @@ class Config{
         
         return self::getInstance()->getConfig( $request );
     }
-    
+
+    /**
+     * Walk through a config branch from leaf to root
+     * Gets multiple config values
+     * - from the initial request
+     * - then reduce request keys one by one and append a given key to it until a stop key is faced
+     *
+     * Example:
+     * - request: 'middleware.controllers.api.rest.user.get'
+     * - key: 'common'
+     * - until: 'middlewares'
+     * Will return values for requests:
+     *  - middleware.controllers.api.rest.user.get
+     *  - middleware.controllers.api.rest.user.common
+     *  - middleware.controllers.api.rest.common
+     *  - middleware.controllers.api.common
+     *  - middleware.controllers.common
+     *
+     * @param string $request
+     * @param string $keyToAppend
+     * @param string|null $stopKey
+     *
+     * @return array
+     *
+     * @throws ConfigException
+     */
+    public static function getRegressiveWithKey( string $request, string $keyToAppend, string $stopKey = null  ): array
+    {
+        self::isInitialized()
+            || throw new ConfigException( 'Initialize config first' );
+
+        $result[] = (array) self::get( $request );
+
+        $requestArray = explode( '.', $request );
+
+        do{
+            $currentRequest = implode( '.', $requestArray ) . ".$keyToAppend";
+            $result[] = (array)self::get( $currentRequest );
+
+            // Cut last part of request
+            array_pop( $requestArray );
+
+        }while( self::getLastRequestPart( $requestArray ) !== $stopKey );
+
+        return array_filter( array_merge( ...$result ) );
+
+    }
+
+    public static function getLastRequestPart( array $request ): ?string
+    {
+        return array_pop( $request );
+    }
+
     public static function export(): array
     {
         return self::getInstance()->config;
