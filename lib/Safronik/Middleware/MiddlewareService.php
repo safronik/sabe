@@ -6,6 +6,17 @@ use Safronik\Core\Config;
 
 final class MiddlewareService
 {
+    private const CONFIG_PATH    = 'middlewares';
+    private const CONFIG_REQUEST = 'middlewares.config';
+
+    private string $commonKey;
+
+    public function __construct()
+    {
+        $config = Config::get(self::CONFIG_REQUEST);
+        $this->commonKey = $config['common'] ?? 'common';
+    }
+
     public function executeFor( object $target, string $method, array $parameters = [] ): void
     {
         $middlewaresToRun = $this->getMiddlewaresFromConfig( $target, $method );
@@ -24,8 +35,8 @@ final class MiddlewareService
 
         return Config::getRegressiveWithKey(
             $configRequest,
-            'common',
-            'middlewares'
+            $this->commonKey,
+            self::CONFIG_PATH
         );
     }
 
@@ -40,6 +51,6 @@ final class MiddlewareService
         $configPath[count($configPath) - 1] = str_replace( Config::get('service_words'), '', $configPath[count($configPath) - 1]);
         $configPath = implode( '.', $configPath);
 
-        return "middlewares.$configPath.$method";
+        return self::CONFIG_PATH . ".$configPath.$method";
     }
 }
