@@ -4,6 +4,7 @@ namespace Safronik\Router;
 
 use Safronik\CodePatterns\Exceptions\ContainerException;
 use Safronik\CodePatterns\Structural\DI;
+use Safronik\Controllers\Controller;
 use Safronik\Router\Exceptions\RouterException;
 use Safronik\Router\Routes\AbstractRoute;
 
@@ -47,10 +48,14 @@ class Router
      */
     public function executeRoute(): void
     {
-        $controller = DI::get( $this->route->getController(), [ 'route' => $this->route ] );
+        /** @var Controller $controller */
+        $controller = DI::get(
+            $this->route->getController(),
+            [ 'route' => $this->route ]
+        );
 
         try{
-            $controller->{$this->route->getEndpoint()}();
+            $controller->executeEndpoint($this->route->getEndpoint());
         }catch (\Exception $exception ){
             $controller->handleError( $exception );
         }

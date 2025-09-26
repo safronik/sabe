@@ -4,6 +4,7 @@ namespace Safronik\Controllers;
 
 use Exception;
 use Safronik\Core\ValidationHelper;
+use Safronik\Middleware\MiddlewareService;
 use Safronik\Router\Endpoint;
 use Safronik\Router\Request;
 use Safronik\Router\Routes\AbstractRoute;
@@ -11,20 +12,22 @@ use Safronik\Views\ViewInterface;
 
 abstract class Controller{
     
-    protected AbstractRoute $route;
-    protected Request       $request;
-    protected ViewInterface $view;
-    
+    protected AbstractRoute     $route;
+    protected Request           $request;
+    protected ViewInterface     $view;
+    protected MiddlewareService $middlewareService;
+
     public function __construct( AbstractRoute $route )
     {
-        $this->request = Request::getInstance();
-        $this->route   = $route;
+        $this->request    = Request::getInstance();
+        $this->route      = $route;
+        $this->middlewareService = new MiddlewareService();
 
         // Initialize
         method_exists($this, 'init' ) && $this->init();
     }
 
-    public function actionShowEndpoints(): void
+    protected function actionShowEndpoints(): void
     {
         $this->view->renderData( ['endpoints' => $this->getEndpoints() ] );
     }
@@ -54,6 +57,18 @@ abstract class Controller{
         }
 
         return $endpoints ?? [];
+    }
+
+    public function executeEndpoint( string $endpoint_name )
+    {
+        $this->middlewareService->executeFor(
+            $this,
+            $endpoint_name,
+            [ 'request' => $this->request ]
+        );
+
+        // Execute endpoint
+        $this->$endpoint_name();
     }
 
     /**
