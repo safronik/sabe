@@ -12,6 +12,13 @@ abstract class Entity extends Value{
         'id' => [ 'required',  'type' => 'integer', 'length' => 11, 'content' => '@^[0-9]+$@', 'extra' => 'AUTO_INCREMENT' ],
     ];
 
+    public function __construct( $data = [], $is_child = false )
+    {
+        parent::__construct( $data );
+
+        $is_child || EntityManager::setEntityStateAs( EntityManager::NEW, $this );
+    }
+
     protected static function createRules(): void
     {
         $rules = self::RULES;
@@ -24,13 +31,6 @@ abstract class Entity extends Value{
         static::$rules = array_merge( static::$rules, $rules );
 
         parent::createRules();
-    }
-
-    public function __construct( $data = [], $is_child = false )
-    {
-        parent::__construct( $data );
-
-        $is_child || EntityManager::setEntityStateAs( EntityManager::NEW, $this );
     }
 
     public function getId()
