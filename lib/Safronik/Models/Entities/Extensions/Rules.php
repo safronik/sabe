@@ -12,7 +12,14 @@ trait Rules
     protected static function createRules(): void
     {
         $rules = static::RULES;
-        array_walk( $rules, static function( &$rule, $name ){ $rule = new Rule( $rule, $name ); } );
+
+        array_walk(
+            $rules,
+            static function( &$rule, $name ){
+                $rule = new Rule( $rule, $name );
+            }
+        );
+
         static::$rules = array_merge( static::$rules, $rules );
     }
 
@@ -63,7 +70,7 @@ trait Rules
         return static fn( $rule, $field ) => $rule->required;
     }
 
-    public static function filterExceptType( $type ): callable
+    public static function filterExceptType( string $type ): callable
     {
         return match( $type ){
             'scalar'  => static fn( $rule, $field )  => $rule->is_scalar,

@@ -23,6 +23,9 @@ class SanitizerHelper extends BaseSanitizerHelper
 
     private static function convertRules( &$rules ): void
     {
-        array_walk( $rules, static fn( array|Rule &$rule) => $rule = $rule instanceof Rule ? $rule->initial : $rule );
+        array_walk(
+            $rules,
+            static fn( array|Rule &$rule ) => $rule = $rule instanceof Rule ? $rule->initial : $rule
+        );
     }
 }

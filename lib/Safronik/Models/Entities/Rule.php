@@ -14,8 +14,6 @@ class Rule{
     public readonly array|string        $content;
     public readonly string              $extra;
     public readonly mixed               $default;
-
-    public ?string $table = null;
     
     public readonly bool $is_scalar;
     public readonly bool $is_entity;
@@ -24,7 +22,7 @@ class Rule{
 
     public readonly array $initial;
 
-    private array $validation_rules = [
+    private array $rulesForRule = [
         'type'    => [ 'type' => 'string', 'required', ],
         'length'  => [ 'type' => 'integer|array', 'default' => 1, ],
         'content' => [ 'type' => 'string|array', ],
@@ -35,8 +33,8 @@ class Rule{
     public function __construct( array $rule_parameters, string $name )
     {
         // Check that the rule is correct
-        ValidationHelper::validate( $rule_parameters, $this->validation_rules );
-        SanitizerHelper::sanitize( $rule_parameters, $this->validation_rules );
+        ValidationHelper::validate( $rule_parameters, $this->rulesForRule );
+        SanitizerHelper::sanitize( $rule_parameters, $this->rulesForRule );
 
         $this->initial  = $rule_parameters;
         $this->field    = $name;
