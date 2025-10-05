@@ -14,20 +14,20 @@ class ErrorHandler
         'error_reporting'       => 0,
         'display_errors'        => 'Off',
         'catch_buffer'          => true,
-        'log_file'              => 'error.critical.log',
+        'log_file'              => 'error.critical',
         'ERROR_TYPES_TO_HANDLE' => [],
     ];
 
     private const MODE_STAGE_OPTIONS = [
         // @todo
-        'log_file'              => self::MODE_STAGE. '.error.critical.log'
+        'log_file'              => self::MODE_STAGE. '.error.critical'
     ];
 
     private const MODE_DEV_OPTIONS   = [
         'error_reporting'       => E_ALL ^ E_DEPRECATED,
         'display_errors'        => true,
         'catch_buffer'          => true,
-        'log_file'              => self::MODE_DEV. '.error.critical.log',
+        'log_file'              => self::MODE_DEV. '.error.critical',
         'error_types_to_handle' => [
             E_ERROR,
             E_PARSE,
