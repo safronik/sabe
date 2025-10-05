@@ -223,16 +223,6 @@ abstract class RestController extends ApiController{
     private function callCallback( $callback ): void
     {
         try{
-            // @todo implement middleware
-//            $this->checkApiKey();
-//            $this->controlLimits(
-//                $period,
-//                $limit,
-//                [
-//                    'controller' => static::class,
-//                    'method'     => $name,
-//                ]
-//            );
             $this->$callback();
         }catch( Exception $exception ){
             DI::get( RestView::class )->renderError( $exception );

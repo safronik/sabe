@@ -59,8 +59,9 @@ abstract class Controller{
         return $endpoints ?? [];
     }
 
-    public function executeEndpoint( string $endpoint_name )
+    public function executeEndpoint( string $endpoint_name ): void
     {
+        // Run middlewares
         $this->middlewareService->executeFor(
             $this,
             $endpoint_name,
