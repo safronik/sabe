@@ -56,7 +56,7 @@ class Router
 
         try{
             $controller->executeEndpoint($this->route->getEndpoint());
-        }catch (\Exception $exception ){
+        }catch ( \Exception $exception ){
             $controller->handleError( $exception );
         }
     }

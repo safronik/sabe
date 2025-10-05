@@ -5,9 +5,11 @@ require_once 'autoloader.php';
 
 new Safronik\Core\Core( __DIR__ );
 
-function App()
+function app( string $name = null )
 {
-    return \Safronik\Core\Core::getInstance();
+    return $name
+        ? \Safronik\Core\Core::getInstance( 'default' )
+        : \Safronik\Core\Core::getInstance( $name );
 }
 
 try{

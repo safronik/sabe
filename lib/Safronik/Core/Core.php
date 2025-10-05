@@ -4,6 +4,7 @@ namespace Safronik\Core;
 
 use Safronik\CodePatterns\Generative\Multiton;
 use Safronik\CodePatterns\Structural\DI;
+use Safronik\Core\Exceptions\ConfigException;
 use Safronik\DB\DBConfig;
 
 /**
@@ -19,6 +20,9 @@ readonly class Core
     private const DIR_RUNTIME = 'runtime';
     private const DIR_CONFIG = 'runtime';
 
+    /**
+     * @throws ConfigException
+     */
     public function __construct( string $root_dir, array $additional_config = [] )
     {
         $this->initConfig( $root_dir, $additional_config );
