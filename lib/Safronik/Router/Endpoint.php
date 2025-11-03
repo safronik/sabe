@@ -37,8 +37,15 @@ class Endpoint
         $docBlock  = $endpoint_reflection->getDocComment();
 
         $this->name        = lcfirst( str_replace( [ 'action', 'method' ], '', $endpoint_reflection->getName() ) );
-        $this->parameters  = $endpoint_reflection->getParameters() ?: $this->getParametersFromDocBlock($docBlock);
-        $this->path        = $path . '/' . $this->name;
+
+        $this->parameters  = $this->getParametersFromDocBlock($docBlock)
+            ?: $endpoint_reflection->getParameters();
+
+        $pathArray = explode('/', $path);
+        array_pop($pathArray);
+        $pathArray[] = $this->name;
+        $this->path = implode('/', $pathArray);
+
         $this->description = $this->getDescriptionFromDocBlock($docBlock);
         $this->type        = $this->detectMethodType($endpoint_reflection->getName());
         $this->controllerType = match (true){

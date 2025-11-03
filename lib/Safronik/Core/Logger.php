@@ -2,7 +2,7 @@
 
 namespace Safronik\Core;
 
-use Safronik\Core\Exceptions\ConfigException;
+use Exception;
 
 /**
  * Class Logger
@@ -23,40 +23,29 @@ class Logger
     protected const EXTENSION          = '.log';
     protected const END_OF_LOG_MESSAGE = "\n\n";
 
-    protected static ?string $root = null;
-
     /**
-     * Log a message
+     * Logs a message
      *
      *  Usage example:
      *  - Logger::log('Hello world');           // Logs 'Hello world' to ROOT/logs/default.log
      *  - Logger::log('Hello world', 'my_log'); // Logs 'Hello world' to ROOT/logs/my_log.log
      *
-     * @param mixed       $message
+     * @param mixed $message
      * @param string|null $to
+     * @param string|null $app
      *
-     * @throws ConfigException
+     * @throws Exception
      */
-    public static function log( mixed $message, ?string $to = null ): void
+    public static function log( mixed $message, ?string $to = null, ?string $app = null ): void
     {
-        $to = $to
-            ? static::getRoot() . DIRECTORY_SEPARATOR . static::DEFAULT_FOLDER . $to .                  static::EXTENSION
-            : static::getRoot() . DIRECTORY_SEPARATOR . static::DEFAULT_FOLDER . static::DEFAULT_FILE . static::EXTENSION;
+        $root = $app
+            ? Apps::get( $app )->config->get('dirs.root')
+            : ROOT_DIR . DIRECTORY_SEPARATOR . 'apps' . DIRECTORY_SEPARATOR . 'base';
 
         file_put_contents(
-            $to,
-            $message . self::END_OF_LOG_MESSAGE,
+            $root . DIRECTORY_SEPARATOR . static::DEFAULT_FOLDER . ( $to ?? static::DEFAULT_FILE ). static::EXTENSION,
+            $message . static::END_OF_LOG_MESSAGE,
             FILE_APPEND
         );
-    }
-
-    /**
-     * Caches the root directory
-     *
-     * @throws ConfigException
-     */
-    private static function getRoot()
-    {
-        return static::$root ?? Config::get('dirs.root');
     }
 }

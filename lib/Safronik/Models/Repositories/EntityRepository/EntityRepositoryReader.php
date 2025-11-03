@@ -4,6 +4,7 @@ namespace Safronik\Models\Repositories\EntityRepository;
 
 use Safronik\Models\Entities\Entity;
 use Safronik\Models\Entities\Obj;
+use Safronik\Models\Entities\SchemaProviders\RelationSchemaProvider;
 use Safronik\Models\Entities\Value;
 
 trait EntityRepositoryReader
@@ -142,7 +143,7 @@ trait EntityRepositoryReader
     protected function readEntitiesData( string $parent_table, array $parent_ids, string|Entity $entity_type ): array
     {
         $sub_entity_table = $entity_type::getTable();
-        $relation_table   = $parent_table . '__to__' . $sub_entity_table;
+        $relation_table   = $parent_table . RelationSchemaProvider::RELATION_MARK . $sub_entity_table;
 
         return $this->db
             ->select( $sub_entity_table )

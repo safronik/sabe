@@ -11,7 +11,9 @@ use Safronik\Models\Entities\SchemaProviders\MetaObjects\MetaEntity;
 use Safronik\Models\Entities\SchemaProviders\MetaObjects\MetaValue;
 
 class RelationSchemaProvider extends BaseSchemaProvider{
-    
+
+    public const RELATION_MARK = '__to__';
+
     private MetaEntity $secondary;
     
     private array  $relation_rules;
@@ -24,7 +26,7 @@ class RelationSchemaProvider extends BaseSchemaProvider{
         parent::__construct( $primary );
         
         $this->secondary        = $secondary;
-        $this->table            = $this->object->table . '__to__' . $this->secondary->table;
+        $this->table            = $this->object->table . self::RELATION_MARK . $this->secondary->table;
         $this->primary_column   = $this->object->table . '_id';
         $this->secondary_column = $this->secondary->table . '_id';
         
@@ -46,7 +48,7 @@ class RelationSchemaProvider extends BaseSchemaProvider{
      * @return Table
      * @throws \Exception
      */
-    public function getEntitySchema(): Table
+    public function getSchema(): Table
     {
         return new Table(
             $this->table,

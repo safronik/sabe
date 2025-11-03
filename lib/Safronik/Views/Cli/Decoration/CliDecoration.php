@@ -19,8 +19,8 @@ class CliDecoration
     {
         $decoration = [];
         $style       && $decoration[] = self::encodeStyle( $style );
-        $text_color  && $decoration[] = self::DECORATE_COLOR . self::encodeColorText( $text_color );
-        $back_color  && $decoration[] = self::DECORATE_BACK  . self::encodeColorBack( $back_color );
+        $text_color  && $decoration[] = self::DECORATE_COLOR . self::encodeColor( $text_color );
+        $back_color  && $decoration[] = self::DECORATE_BACK  . self::encodeColor( $back_color );
 
         return
             self::START_DECORATE .
@@ -43,16 +43,6 @@ class CliDecoration
             'strikethrough' => 6,
             default         => self::DEFAULT_TEXT_STYLE,
         };
-    }
-
-    public static function encodeColorText( ?string $color = null ): string
-    {
-        return self::encodeColor( $color ?? self::DEFAULT_TEXT_COLOR );
-    }
-
-    public static function encodeColorBack( ?string $color = null ): string
-    {
-        return self::encodeColor( $color ?? self::DEFAULT_BACK_COLOR );
     }
 
     public static function encodeColor($color ): string

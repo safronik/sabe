@@ -2,26 +2,24 @@
 
 namespace Safronik\Controllers;
 
+use Safronik\Controllers\Exceptions\EndpointNotImplementedException;
 use Exception;
-use Safronik\Core\ValidationHelper;
-use Safronik\Middleware\MiddlewareService;
+use Safronik\Core\Structure\Element;
 use Safronik\Router\Endpoint;
 use Safronik\Router\Request;
-use Safronik\Router\Routes\AbstractRoute;
+use Safronik\Router\Routes\Route;
 use Safronik\Views\ViewInterface;
 
-abstract class Controller{
-    
-    protected AbstractRoute     $route;
-    protected Request           $request;
-    protected ViewInterface     $view;
-    protected MiddlewareService $middlewareService;
+abstract class Controller extends Element{
 
-    public function __construct( AbstractRoute $route )
+    protected Route         $route;
+    protected Request       $request;
+    protected ViewInterface $view;
+
+    public function __construct( Route $route )
     {
         $this->request    = Request::getInstance();
         $this->route      = $route;
-        $this->middlewareService = new MiddlewareService();
 
         // Initialize
         method_exists($this, 'init' ) && $this->init();
@@ -62,14 +60,17 @@ abstract class Controller{
     public function executeEndpoint( string $endpoint_name ): void
     {
         // Run middlewares
-        $this->middlewareService->executeFor(
-            $this,
-            $endpoint_name,
-            [ 'request' => $this->request ]
-        );
+        $this->runMiddlewares( $endpoint_name, [ 'request' => $this->request ] );
 
         // Execute endpoint
-        $this->$endpoint_name();
+        try{
+            $this->call($endpoint_name );
+        }catch( \BadMethodCallException ){
+            throw new EndpointNotImplementedException(
+                "Trying to call not implemented {$this->route->getPath()}",
+                501,
+            );
+        }
     }
 
     /**
@@ -79,13 +80,5 @@ abstract class Controller{
     public function handleError( Exception $exception ): void
     {
         $this->view->renderError( $exception );
-    }
-
-    protected function validateRequest( array $validation_rules ): void
-    {
-        ValidationHelper::validate(
-            $this->request->parameters,
-            $validation_rules
-        );
     }
 }

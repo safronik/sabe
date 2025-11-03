@@ -39,8 +39,11 @@ abstract class BaseSchemaProvider
      * @return Table
      * @throws \Exception
      */
-    abstract public function getEntitySchema(): Table;
-    
+    abstract public function getSchema(): Table;
+
+
+//    abstract public function getSchemas(): array;
+
     /**
      * Returns entity columns SQL-scheme
      *

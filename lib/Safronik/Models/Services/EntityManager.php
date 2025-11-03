@@ -126,7 +126,9 @@ final class EntityManager{
     public function delete( string $entity_class, $condition ): int|string
     {
         $entity = $this->find( $entity_class, $condition, amount: 1 )[ 0 ] ?? null;
-        $entity || throw new Exception('Entity not found', 404 );
+
+        $entity
+            || throw new Exception('Entity not found', 404 );
 
         $deleted_id = $entity->getId();
 

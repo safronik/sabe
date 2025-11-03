@@ -2,8 +2,8 @@
 
 namespace Safronik\Models\Entities;
 
-use Safronik\Core\SanitizerHelper;
-use Safronik\Core\ValidationHelper;
+use Safronik\Core\Helpers\SanitizerHelper;
+use Safronik\Core\Helpers\ValidationHelper;
 
 class Rule{
 

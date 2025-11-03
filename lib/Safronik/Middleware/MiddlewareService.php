@@ -2,19 +2,21 @@
 
 namespace Safronik\Middleware;
 
-use Safronik\Core\Config;
+use Safronik\Core\Config\Config;
+use Safronik\Core\Config\Defaults;
 
 final class MiddlewareService
 {
-    private const CONFIG_PATH    = 'middlewares';
-    private const CONFIG_REQUEST = 'middlewares.config';
+    private const CONFIG_PATH        = 'middlewares';
+    private const DEFAULT_COMMON_KEY = 'common';
 
     private string $commonKey;
+    private Config $config;
 
-    public function __construct()
+    public function __construct( Config $config )
     {
-        $config = Config::get(self::CONFIG_REQUEST);
-        $this->commonKey = $config['common'] ?? 'common';
+        $this->config    = $config;
+        $this->commonKey = $this->config->get('middlewares.meta.common_key') ?? self::DEFAULT_COMMON_KEY;
     }
 
     public function executeFor( object $target, string $method, array $parameters = [] ): void
@@ -22,6 +24,9 @@ final class MiddlewareService
         $middlewaresToRun = $this->getMiddlewaresFromConfig( $target, $method );
 
         foreach( $middlewaresToRun as $middleware ){
+
+            $middleware instanceof MiddlewareInterface
+                || throw new \BadMethodCallException( 'Middleware ' . $middleware::class . ' must implement MiddlewareInterface' );
 
             $middleware = new $middleware();
             $middleware->execute( $parameters );
@@ -33,7 +38,7 @@ final class MiddlewareService
     {
         $configRequest = $this->convertTargetToConfigRequest($target, $method);
 
-        return Config::getRegressiveWithKey(
+        return $this->config->getRegressiveWithKey(
             $configRequest,
             $this->commonKey,
             self::CONFIG_PATH
@@ -48,7 +53,7 @@ final class MiddlewareService
         $configPath = str_replace( '\\', '.', $target::class);
         $configPath = strtolower( $configPath);
         $configPath = explode( '.', $configPath);
-        $configPath[count($configPath) - 1] = str_replace( Config::get('service_words'), '', $configPath[count($configPath) - 1]);
+        $configPath[count($configPath) - 1] = str_replace( Defaults::service_words->value(), '', $configPath[count($configPath) - 1]);
         $configPath = implode( '.', $configPath);
 
         return self::CONFIG_PATH . ".$configPath.$method";

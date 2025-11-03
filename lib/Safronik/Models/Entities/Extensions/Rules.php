@@ -29,7 +29,8 @@ trait Rules
      */
     public static function rules( ...$filters ): array
     {
-        static::$rules || static::createRules();
+        current(static::$rules) instanceof Rule
+            || static::createRules();
 
         $rules = static::$rules;
 

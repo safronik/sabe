@@ -2,6 +2,7 @@
 
 namespace Safronik\Models\Entities\SchemaProviders;
 
+use Safronik\Core\Exceptions\Exception;
 use Safronik\DBMigrator\Objects\Schema;
 use Safronik\Models\Entities\Entity;
 use Safronik\Models\Entities\SchemaProviders\MetaObjects\MetaEntity;
@@ -15,53 +16,64 @@ class DomainsSchemaProvider{
     
     // Input
     private string $entity_root_namespace;
-    private array  $exclusions;
+    private array  $exclusions = [
+        'ValueObject',
+        'EntityObject',
+    ];
     
     // Process result
     private array  $entities = [];
-    
+    private string $domains_directory;
+
     /**
      * Get entities from the directory
      *
-     * @param string $domains_directory
-     * @param string $entity_root_namespace
-     * @param array  $exclusions
+     * @throws Exception
      */
-    public function __construct( string $domains_directory, string $entity_root_namespace, array $exclusions = ['ValueObject', 'EntityObject', ] )
+    public function __construct( string $domains_directory, string $entity_root_namespace )
     {
-        $this->entity_root_namespace = $entity_root_namespace;
-        $this->exclusions            ??= $exclusions;
+        is_dir( $domains_directory )
+            || throw new Exception( "Directory not found $domains_directory" );
 
-        $iterator = new \DirectoryIterator($domains_directory);
+        $this->domains_directory     = $domains_directory;
+        $this->entity_root_namespace = $entity_root_namespace;
+
+        $this->collectEntitiesFromDirectory();
+    }
+
+    private function collectEntitiesFromDirectory(): void
+    {
+        $iterator = new \DirectoryIterator($this->domains_directory);
 //        $iterator = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::SELF_FIRST);
-        
+
         foreach( $iterator as $file ){
             if( $file->isFile() && $file->getExtension() === 'php' ){
-                
+
                 $file_basename = $file->getBasename('.php');
+
                 if( $this->isExclusion( $file_basename) ){
                     continue;
                 }
-                
-                $entity_class = $entity_root_namespace . $file->getPath() . '/' . $file->getBasename( '.php' );
+
+                $entity_class = $this->entity_root_namespace . $file->getPath() . '/' . $file->getBasename( '.php' );
                 $entity_class = str_replace(
-                    [ $domains_directory, '/' ],
+                    [ $this->domains_directory, '/' ],
                     [ '', '\\' ],
                     $entity_class
                 );
-                
+
                 if( ! is_subclass_of( $entity_class, Value::class ) ){
                     continue;
                 }
-                
+
                 if( is_subclass_of( $entity_class, Entity::class ) ){
                     $this->entities[] = $entity_class;
                 }
             }
-            
+
         }
     }
-    
+
     public function getDomainsSchema( array|string|object $entities = null ): Schema
     {
         $entities ??= $this->entities;
@@ -76,8 +88,11 @@ class DomainsSchemaProvider{
             
             $meta_entity     = new MetaEntity($entity, $this->entity_root_namespace);
             $schema_provider = new EntitySchemaProvider( $meta_entity );
-            
-            $schemas['entities'][] = $schema_provider->getEntitySchema();
+
+//            $schemas = array_merge_recursive( $schemas, $schema_provider->getSchemas() );
+
+            $schemas['entities'][] = $schema_provider->getSchema();
+            $schemas['entities']   = array_merge($schemas['entities'],  $schema_provider->getEntitiesSchema() );
             $schemas['values']     = array_merge($schemas['values'],    $schema_provider->getValuesSchema() );
             $schemas['relations']  = array_merge($schemas['relations'], $schema_provider->getRelationsSchema() );
         }
@@ -100,5 +115,10 @@ class DomainsSchemaProvider{
     private function isExclusion( $filename ): bool
     {
         return in_array( $filename, $this->exclusions, true );
+    }
+
+    public function setExclusions( array $exclusions ): void
+    {
+        $this->exclusions = $exclusions;
     }
 }

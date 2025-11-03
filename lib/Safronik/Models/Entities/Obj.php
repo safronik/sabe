@@ -2,7 +2,6 @@
 
 namespace Safronik\Models\Entities;
 
-use Models\Entities\AppEntity;
 use Safronik\Models\Entities\Exceptions\EntityException;
 use Safronik\Models\Entities\Extensions\ObjectHydrator;
 use Safronik\Models\Entities\Extensions\ObjectProperties;
@@ -14,7 +13,6 @@ abstract class Obj{
     use ObjectHydrator;
     use ObjectProperties;
     use ObjectHelper;
-    use AppEntity;
 
     /**
      * @throws EntityException

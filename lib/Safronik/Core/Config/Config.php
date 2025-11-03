@@ -1,15 +1,14 @@
 <?php
 
-namespace Safronik\Core;
+namespace Safronik\Core\Config;
 
-use Safronik\CodePatterns\Generative\Singleton;
 use Safronik\Core\Exceptions\ConfigException;
 use Safronik\Helpers\ReflectionHelper;
 
 class Config{
-    
-    use Singleton;
-    
+
+    private const SEPARATOR = '.';
+
     private array $config = [];
     
     public function __construct( string $config_dir, array $additional_config = [] )
@@ -19,10 +18,10 @@ class Config{
         
         // Setup config from config files
         $this->getConfigsFromDirectory( $config_dir );
-        
+
         // Append additional config passed directly. Overwrites other configs
         $this->config = $additional_config
-            ? array_merge_recursive( $this->config, $additional_config )
+            ? array_replace_recursive( Defaults::get(), $this->config, $additional_config )
             : $this->config;
     }
     
@@ -44,14 +43,23 @@ class Config{
      * @param string $request
      *
      * @return mixed
-     * @throws ConfigException
      */
-    public static function get( string $request ): mixed
+    public function get( string $request ): mixed
     {
-        self::isInitialized()
-            || throw new ConfigException( 'Initialize config first' );
-        
-        return self::getInstance()->getConfig( $request );
+        $config_route = explode( static::SEPARATOR, $request );
+        $base_path    = array_shift( $config_route );
+        $config_value = $this->config[$base_path] ?? null;
+
+        foreach( $config_route as $path ){
+
+            if( ! isset( $config_value ) ){
+                return null;
+            }
+
+            $config_value = $config_value[ $path ] ?? null;
+        }
+
+        return $config_value;
     }
 
     /**
@@ -76,21 +84,16 @@ class Config{
      * @param string|null $stopKey
      *
      * @return array
-     *
-     * @throws ConfigException
      */
-    public static function getRegressiveWithKey( string $request, string $keyToAppend, string $stopKey = null  ): array
+    public function getRegressiveWithKey( string $request, string $keyToAppend, string $stopKey = null  ): array
     {
-        self::isInitialized()
-            || throw new ConfigException( 'Initialize config first' );
+        $result[] = (array) $this->get( $request );
 
-        $result[] = (array) self::get( $request );
-
-        $requestArray = explode( '.', $request );
+        $requestArray = explode( static::SEPARATOR, $request );
 
         do{
-            $currentRequest = implode( '.', $requestArray ) . ".$keyToAppend";
-            $result[] = (array)self::get( $currentRequest );
+            $currentRequest = implode( static::SEPARATOR, $requestArray ) . ".$keyToAppend";
+            $result[] = (array)$this->get( $currentRequest );
 
             // Cut last part of request
             array_pop( $requestArray );
@@ -106,29 +109,11 @@ class Config{
         return array_pop( $request );
     }
 
-    public static function export(): array
+    public function export(): array
     {
-        return self::getInstance()->config;
+        return $this->config;
     }
-    
-    public function getConfig( string $request ): mixed
-    {
-        $config_route = explode( '.', $request );
-        $base_path    = array_shift( $config_route );
-        $config_value = $this->$base_path;
-        
-        foreach( $config_route as $path ){
-            
-            if( ! isset( $config_value ) ){
-                return null;
-            }
-            
-            $config_value = $config_value[ $path ] ?? null;
-        }
-        
-        return $config_value;
-    }
-    
+
     public function setConfig( string $root ): void
     {
         $config = [
@@ -223,19 +208,16 @@ class Config{
         
         return array_combine( $aliases, $classes );
     }
-    
-    public static function isDeveloperMode(): bool
-    {
-        return self::get('options.mode' ) === 'develop';
-    }
-    
+
     public function __get( string $name ): mixed
     {
-        return $this->config[ $name ] ?? null;
+        $name = str_replace( '__', static::SEPARATOR, $name );
+
+        return $this->get( $name );
     }
     
     public function __isset( string $name ): bool
     {
-        return isset( $this->config[ $name ] );
+        return $this->get( $name ) !== null;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Safronik\Core;
+namespace Safronik\Core\Helpers;
 
 use Safronik\Helpers\SanitizerHelper as BaseSanitizerHelper;
 use Safronik\Models\Entities\Rule;

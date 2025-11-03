@@ -5,7 +5,7 @@ namespace Safronik\Router\Routes;
 use Safronik\Router\Exceptions\RouterException;
 use Safronik\Router\Request;
 
-abstract class AbstractRoute
+abstract class Route
 {
     protected string $type;     // Controller type (web, api, ftp, cli, ... )
     protected string $path;     // Controller to call
@@ -15,6 +15,9 @@ abstract class AbstractRoute
     protected array  $route;
     protected string $namespace;
 
+    /**
+     * @throws RouterException
+     */
     abstract public function searchForAvailableEndpoint(): void;
 
     public function __construct( string $type, string $path, string $root_namespace )
@@ -23,7 +26,7 @@ abstract class AbstractRoute
         $this->namespace  = $root_namespace;
         $this->path       = $this->standardizePath( $path, $this->type );
         $this->route      = explode( '\\', $this->path );
-        $this->controller = $this->namespace . '\\' . implode( '\\', array_slice( $this->route, 0, -1 ) ) . 'Controller';
+        $this->controller = $this->namespace . '\\' . 'Controllers' . '\\' . implode( '\\', array_slice( $this->route, 0, -1 ) ) . 'Controller';
         $this->endpoint   = ucfirst( $this->route[ array_key_last( $this->route ) ] );
     }
 
@@ -46,6 +49,9 @@ abstract class AbstractRoute
         return ucwords( $path, '\\' );
     }
 
+    /**
+     * @throws RouterException
+     */
     public function ensureIsAvailable(): void
     {
         $this->isControllerAvailable()
@@ -70,13 +76,13 @@ abstract class AbstractRoute
      *
      * api/controller/action::get() became api/controller::action()
      *
-     * @return AbstractRoute
+     * @return Route
      */
     protected function reduceRoute(): self
     {
         $this->endpoint   = array_pop( $this->route );
         $this->path       = implode( '\\', $this->route );
-        $this->controller = $this->namespace . '\\' . $this->path . 'Controller';
+        $this->controller = $this->namespace . '\\' . 'Controllers' . '\\' . $this->path . 'Controller';
 
         return $this;
     }

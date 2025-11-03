@@ -3,8 +3,8 @@
 namespace Safronik\Models\Entities\Extensions;
 
 use JsonException;
-use Safronik\Core\SanitizerHelper;
-use Safronik\Core\ValidationHelper;
+use Safronik\Core\Helpers\SanitizerHelper;
+use Safronik\Core\Helpers\ValidationHelper;
 use Safronik\Models\Entities\Exceptions\EntityException;
 use Safronik\Models\Entities\Obj;
 use Safronik\Models\Entities\Rule;

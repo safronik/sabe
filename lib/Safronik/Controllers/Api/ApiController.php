@@ -3,18 +3,17 @@
 namespace Safronik\Controllers\Api;
 
 use Safronik\Controllers\Controller;
-use Safronik\Router\Routes\AbstractRoute;
-use Safronik\Views\Api\ApiView;
-use Safronik\Views\ViewInterface;
+use Safronik\Router\Routes\Route;
+use Safronik\Views\Api\ApiViewFabric;
+use Safronik\Views\JsonView;
 
 abstract class ApiController extends Controller{
 
-    protected ViewInterface $view;
-
-    public function __construct( AbstractRoute $route, ApiView $view)
+    public function __construct( Route $route )
     {
-        $this->view = $view;
+//        $this->view = ApiViewFabric::fabricBy( ApiViewFabric::ACCEPT_HEADER );
+        $this->view = new JsonView();
 
-        parent::__construct($route);
+        parent::__construct( $route );
     }
 }

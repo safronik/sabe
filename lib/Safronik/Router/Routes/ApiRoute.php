@@ -4,7 +4,7 @@ namespace Safronik\Router\Routes;
 
 use Safronik\Router\Exceptions\RouterException;
 
-final class ApiRoute extends AbstractRoute
+final class ApiRoute extends Route
 {
     /**
      * @throws RouterException

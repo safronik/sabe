@@ -18,18 +18,19 @@ class ValueSchemaProvider extends BaseSchemaProvider
     
     public function __construct( MetaValue $object )
     {
-        $this->object = $object;
+        parent::__construct( $object );
+
         $this->table = $this->object->table;
         $this->id_column_name = array_key_first($this->object->rules );
     }
-    
+
     /**
      * Returns entity table schema without secondary tables
      *
      * @return Table
      * @throws \Exception
      */
-    public function getEntitySchema(): Table
+    public function getSchema(): Table
     {
         return new Table(
             $this->table,

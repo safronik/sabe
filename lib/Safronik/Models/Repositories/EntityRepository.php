@@ -5,6 +5,7 @@ namespace Safronik\Models\Repositories;
 use Safronik\DB\DB;
 use Safronik\Models\Entities\Entity;
 use Safronik\Models\Entities\Obj;
+use Safronik\Models\Entities\SchemaProviders\RelationSchemaProvider;
 use Safronik\Models\Entities\Value;
 use Safronik\Models\Repositories\EntityRepository\EntityRepositoryReader;
 use Safronik\Models\Services\RepositoryInterfaces\EntityRepositoryInterface;
@@ -67,7 +68,7 @@ class EntityRepository extends BaseRepository implements EntityRepositoryInterfa
             $current->id = $this->db->query( 'SELECT last_insert_id() as id' )->fetch()[ 'id' ];
 
             $this->db
-                ->insert( $parent::getTable() . '__to__' . $current::getTable() )
+                ->insert( $parent::getTable() . RelationSchemaProvider::RELATION_MARK . $current::getTable() )
                 ->values( [ $parent->getId(), $current->getId() ] )
                 ->columns( [ $parent::getTable(), $current::getTable() ] )
                 ->run();

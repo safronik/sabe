@@ -2,21 +2,24 @@
 
 namespace Safronik\Views;
 
+use JsonException;
+use Safronik\Views\Responses\ResponseInterface;
+
 class JsonView extends BaseView{
-    
-    public function init(): void
+
+    public function __construct()
     {
         header( 'Content-Type: application/json' );
     }
 
     /**
-     * @throws \JsonException
+     * @throws JsonException
      */
-    public function render(): ViewInterface
+    public function render(): static
     {
         echo json_encode(
             [
-                'data'=> $this->data,
+                'data'    => $this->data,
                 'message' => $this->message,
             ],
             JSON_THROW_ON_ERROR
@@ -26,25 +29,15 @@ class JsonView extends BaseView{
         return $this;
     }
 
-    public function renderError(\Exception $exception): ViewInterface
+    /**
+     * @throws JsonException
+     */
+    public function renderResponse( ResponseInterface $response ): static
     {
         return $this
-            ->setData( [ 'error' => $exception->getMessage() ] )
-            ->setResponseCode( $exception->getCode() )
-            ->render();
-    }
-
-    public function renderMessage(string $message): ViewInterface
-    {
-        return $this
-            ->setMessage( $message )
-            ->render();
-    }
-
-    public function renderData(object|array $data): ViewInterface
-    {
-        return $this
-            ->setData( $data )
+            ->setMessage( $response->message )
+            ->setData( $response->data )
+            ->setResponseCode( $response->code )
             ->render();
     }
 }

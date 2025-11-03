@@ -2,10 +2,13 @@
 
 namespace Safronik\Core;
 
-use Safronik\CodePatterns\Generative\Multiton;
+use Exception;
 use Safronik\CodePatterns\Structural\DI;
+use Safronik\Core\Config\Config;
+use Safronik\Core\ErrorsProcessing\ErrorHandler;
 use Safronik\Core\Exceptions\ConfigException;
 use Safronik\DB\DBConfig;
+use Safronik\Router\Router;
 
 /**
  * Class Core
@@ -14,34 +17,95 @@ use Safronik\DB\DBConfig;
  */
 readonly class Core
 {
-    // @todo uncomment when I decide to make multiapp
-    // use Multiton;
+    private const DEFAULT_ROOT_DIR = DIRECTORY_SEPARATOR . 'var' . DIRECTORY_SEPARATOR . 'www' . DIRECTORY_SEPARATOR . 'html';
+    private const DIR_RUNTIME      = 'runtime';
+    private const DIR_CONFIG       = 'config';
+    private const DIR_CODE         = 'code';
 
-    private const DIR_RUNTIME = 'runtime';
-    private const DIR_CONFIG = 'runtime';
+    public Config $config;
+    public DI     $di;
+    public Router $router;
 
     /**
      * @throws ConfigException
+     * @throws Exception
      */
-    public function __construct( string $root_dir, array $additional_config = [] )
+    public function __construct( string $appName, array $additionalConfig = [] )
     {
-        $this->initConfig( $root_dir, $additional_config );
+        $rootNamespace    = $this->getAppRootNamespace( $appName );
+        $rootDir          = $this->getAppRootDir( $appName );
+        $additionalConfig = array_merge( $additionalConfig, [ 'app' => ['namespace' => $rootNamespace ] ] );
+
+        $this->initAutoloader( $rootDir, $rootNamespace );
+        $this->initConfig( $rootDir, $additionalConfig );
         $this->initErrorHandler();
         $this->initExceptionHandler();
         $this->initDiContainer();
         $this->initModules();
+        $this->initRouter();
+    }
+
+    private function getAppRootNamespace( string $appName ): string
+    {
+        return ucfirst( $appName );
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getAppRootDir( string $appName ): string
+    {
+        $appRootDir = defined( ROOT_DIR )
+            ?               ROOT_DIR . DIRECTORY_SEPARATOR . 'apps' . DIRECTORY_SEPARATOR . $appName
+            : self::DEFAULT_ROOT_DIR . DIRECTORY_SEPARATOR . 'apps' . DIRECTORY_SEPARATOR . $appName;
+
+        is_dir( $appRootDir )
+            || throw new Exception( 'App not found' );
+
+        return $appRootDir;
+    }
+
+    /**
+     * Register an autoloader function for the current application
+     */
+    private function initAutoloader( string $rootDir, string $rootNamespace ): void
+    {
+        spl_autoload_register(
+            static function( $classname ) use ( $rootDir, $rootNamespace ): void{
+
+                [ $classRootNamespace ] = explode( '\\', $classname );
+
+                if( $classRootNamespace !== $rootNamespace ){
+                    return;
+                }
+
+                $class_filename = str_replace(
+                    ['\\', $rootNamespace],
+                    [DIRECTORY_SEPARATOR, self::DIR_CODE],
+                    $rootDir . DIRECTORY_SEPARATOR . $classname . '.php'
+                );
+
+                if( ! file_exists( $class_filename ) ){
+                    return;
+                }
+
+                require_once( $class_filename );
+            }
+        );
     }
 
     /**
      * Initializes configuration
-     * Uploads config into memory so it can be accessed by Config::get('config.request.by.path')
+     * Uploads config into memory so it can be accessed by Apps::get('APP_NAME')->config->get('config.request.by.path')
      *
-     * @param string $root_dir          Absolute path to the root directory (could be different for different apps)
-     * @param array  $additional_config Additional config to be merged with the default config
+     * @param string $root_dir         Absolute path to the root directory (could be different for different apps)
+     * @param array $additional_config Additional config to be merged with the default config
+     *
+     * @throws ConfigException
      */
     private function initConfig( string $root_dir, array $additional_config = [] ): void
     {
-        Config::initialize(
+        $this->config = new Config(
             $root_dir . DIRECTORY_SEPARATOR . self::DIR_CONFIG,
             array_merge(
                 [
@@ -58,17 +122,12 @@ readonly class Core
     /**
      * Initializes error handling
      * Initializes error logger
-     *
-     * @return void
-     *
-     * @throws Exceptions\ConfigException
-     *
      */
     private function initErrorHandler(): void
     {
         new ErrorHandler(
-            Config::get('options.mode'),
-            Config::get('options.error_handler_custom_params')
+            $this->config->get( 'app.mode'),
+            $this->config->get('settings.errors') ?? []
         );
     }
 
@@ -79,21 +138,16 @@ readonly class Core
 
     private function initDiContainer(): void
     {
-//         $vendor_safronik_dir = $root_dir . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'safronik';
-//         $di_class_map = array_merge(
-//             DI::getClassMapForDirectory( $root_dir . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . 'Safronik', '\Safronik' ),
-//             DI::getClassMapForDirectory( $vendor_safronik_dir . DIRECTORY_SEPARATOR . 'db-wrapper' . DIRECTORY_SEPARATOR . 'src', '\Safronik\DB' ),
-//             DI::getClassMapForDirectory( $vendor_safronik_dir . DIRECTORY_SEPARATOR . 'db-migrator' . DIRECTORY_SEPARATOR . 'src', '\Safronik\DBMigrator' ),
-//         );
-
-        DI::initialize(
-            Config::get('di.class_map'),
-            Config::get('di.interface_map')
+        // Creating DI container
+        $this->di = new DI(
+            $this->config->get('di.class_map') ?? [],
+            $this->config->get('di.interface_map') ?? []
         );
 
-        DI::setParametersFor(
+        // Setup common dependencies
+        $this->di->setParametersFor(
             DBConfig::class,
-            [ Config::get( 'db.mysql' ) ]
+            [ $this->config->get( 'db.mysql' ) ]
         );
     }
 
@@ -103,5 +157,16 @@ readonly class Core
     private function initModules(): void
     {
 
+    }
+
+    private function initRouter(): void
+    {
+        $this->router = $this->di->get(
+            Router::class,
+            [
+                'config' => $this->config,
+                'di'     => $this->di,
+            ]
+        );
     }
 }

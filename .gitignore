@@ -6,10 +6,7 @@ node_modules/
 vendor/
 
 # project files
-App
-AppSabe
-config
-runtime
+/apps/
 
 # ignore log files and databases
 *.log
@@ -21,3 +18,11 @@ tests
 
 #ingnore cache storage
 **/cache
+
+#ingnore logs storage
+**/logs
+
+#ingnore runtime storage
+**/runtime
+
+

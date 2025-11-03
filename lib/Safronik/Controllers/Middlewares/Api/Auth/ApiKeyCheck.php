@@ -2,7 +2,7 @@
 
 namespace Safronik\Controllers\Middlewares\Api\Auth;
 
-use Safronik\Core\ValidationHelper;
+use Safronik\Core\Helpers\ValidationHelper;
 use Safronik\Middleware\MiddlewareInterface;
 use Safronik\Models\Entities\Rule;
 use Safronik\Router\Request;

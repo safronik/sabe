@@ -3,7 +3,7 @@
 /**
  * Register extensions
  */
- foreach( glob( __DIR__ . DIRECTORY_SEPARATOR . 'extension_*' ) as $extension ){
+foreach( glob( __DIR__ . DIRECTORY_SEPARATOR . 'extension_*' ) as $extension ){
     require_once $extension;
 }
 
@@ -18,11 +18,10 @@ spl_autoload_register('loadClass' );
 
 function loadClass( $classname ): void
 {
-    $directory      = getSourceDirectoryByClassname( $classname );
     $class_filename = str_replace(
         '\\',
         DIRECTORY_SEPARATOR,
-        $directory . DIRECTORY_SEPARATOR . $classname . '.php'
+        __DIR__ . DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . $classname . '.php'
     );
 
     if( ! str_contains( $classname, 'ReflectionHelper') && ! file_exists( $class_filename ) ){
@@ -30,17 +29,4 @@ function loadClass( $classname ): void
     }
     
     require_once( $class_filename );
-}
-
-function getSourceDirectoryByClassname( $classname )
-{
-    [ $root_namespace ] = explode( '\\', $classname );
-    
-    return match ( $root_namespace ) {
-        'Controllers' => __DIR__ . DIRECTORY_SEPARATOR . 'App',
-        'Models'      => __DIR__ . DIRECTORY_SEPARATOR . 'App',
-        'Entities'    => __DIR__ . DIRECTORY_SEPARATOR . 'App',
-        'Views'       => __DIR__ . DIRECTORY_SEPARATOR . 'App',
-        default       => __DIR__ . DIRECTORY_SEPARATOR . 'lib',
-    };
 }

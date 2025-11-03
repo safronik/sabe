@@ -5,7 +5,7 @@ namespace Safronik\Controllers\Cli;
 use Safronik\Controllers\Controller;
 use Safronik\Globals\Server;
 use Safronik\Router\Endpoint;
-use Safronik\Router\Routes\AbstractRoute;
+use Safronik\Router\Routes\Route;
 use Safronik\Views\Cli\CliView;
 use Safronik\Views\ViewInterface;
 
@@ -15,7 +15,7 @@ abstract class CliController extends Controller{
 
     protected ViewInterface $view;
 
-    public function __construct( AbstractRoute $route, CliView $view)
+    public function __construct( Route $route, CliView $view)
     {
         $this->view = $view;
 

@@ -2,7 +2,9 @@
 
 namespace Safronik\Models\Services;
 
-abstract class BaseService
+use Safronik\Core\Structure\Element;
+
+abstract class BaseService extends Element
 {
 
 }

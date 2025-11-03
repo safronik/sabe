@@ -4,6 +4,7 @@ namespace Safronik\Views\Cli;
 
 use Safronik\Views\BaseView;
 use Safronik\Views\Cli\Decoration\CliDecoration;
+use Safronik\Views\Responses\ResponseInterface;
 
 class CliView extends BaseView{
 
@@ -11,19 +12,19 @@ class CliView extends BaseView{
     private string $back_color = "0;0;0";
     private string $style = "0";
 
-    public function render(): self
+    public function render(): static
     {
         return $this->renderData( $this->data );
     }
 
-    public function renderError( \Exception $exception ): self
+    public function renderError( \Exception $exception ): static
     {
         return $this
             ->renderMessage( $exception->getMessage(), 'red' )
             ->setColor('white');
     }
 
-    public function renderMessage( string $message, string $color = 'white', string $suffix = "\n" ): self
+    public function renderMessage( string $message, string $color = 'white', string $suffix = "\n" ): static
     {
         $this->setColor($color);
         echo CliDecoration::decorate( $message, $this->text_color, $this->back_color, $this->style ) . $suffix;
@@ -32,7 +33,7 @@ class CliView extends BaseView{
         return $this;
     }
 
-    public function renderData(object|array $data, string $prefix = ''): self
+    public function renderData(object|array $data, string $prefix = ''): static
     {
         if( is_scalar( $data ) ){
             return $this->renderMessage($data);
@@ -70,5 +71,15 @@ class CliView extends BaseView{
     {
         $this->style = CliDecoration::encodeStyle( $style );
         return $this;
+    }
+
+    public function renderResponse( ResponseInterface $response ): static
+    {
+        return $this
+            ->setMessage( $response->message )
+            ->setData( $response->data )
+            ->setResponseCode( $response->code )
+            ->render();
+
     }
 }

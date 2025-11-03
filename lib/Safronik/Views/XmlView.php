@@ -3,9 +3,11 @@
 namespace Safronik\Views;
 
 class XmlView extends BaseView{
-    
-    public function init(): void
+
+    public function __construct()
     {
+        parent::__construct();
+
         header( 'Content-Type: application/xml' );
     }
 
@@ -18,28 +20,5 @@ class XmlView extends BaseView{
         http_response_code( $this->response_code );
 
         return $this;
-    }
-
-
-    public function renderError(\Exception $exception): ViewInterface
-    {
-        return $this
-            ->setData( [ 'error' => $exception->getMessage() ] )
-            ->setResponseCode( $exception->getCode() )
-            ->render();
-    }
-
-    public function renderMessage(string $message): ViewInterface
-    {
-        return $this
-            ->setData( ['message' => $message ] )
-            ->render();
-    }
-
-    public function renderData(object|array $data): ViewInterface
-    {
-        return $this
-            ->setData( [ 'data' => $data ] )
-            ->render();
     }
 }

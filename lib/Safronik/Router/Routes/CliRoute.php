@@ -5,7 +5,7 @@ namespace Safronik\Router\Routes;
 use Safronik\Router\Exceptions\RouterException;
 use Safronik\Router\Request;
 
-final class CliRoute extends AbstractRoute
+final class CliRoute extends Route
 {
     /**
      * @throws RouterException

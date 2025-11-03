@@ -1,22 +1,33 @@
 <?php
 
+use Safronik\Core\Apps;
+
 require_once 'vendor/autoload.php';
 require_once 'autoloader.php';
 
-new Safronik\Core\Core( __DIR__ );
+const ROOT_DIR = __DIR__;
 
-function app( string $name = null )
+error_reporting( E_ALL );
+ini_set( 'display_errors', true );
+
+function config( string $app, string $request )
 {
-    return $name
-        ? \Safronik\Core\Core::getInstance( 'default' )
-        : \Safronik\Core\Core::getInstance( $name );
+    return Apps::get( $app )->config->get( $request );
 }
 
+/**
+ * Setup common things like:
+ * - Application mode
+ * - Error handling
+ */
+Apps::init( 'base' );
+Apps::init( 'sabe' );
+
 try{
-    
-    $router = new \Safronik\Router\Router( 'Controllers' );
-    $router->findExecutable() && $router->executeRoute();
-    
+
+    Apps::get( 'sabe' )->router->findExecutable()
+        && Apps::get( 'sabe' )->router->executeRoute();
+
 }catch(\Exception $exception){
     
     echo match( \Safronik\Router\Request::determineType() ){
